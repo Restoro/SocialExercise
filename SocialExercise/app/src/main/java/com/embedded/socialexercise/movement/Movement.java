@@ -5,5 +5,5 @@ package com.embedded.socialexercise.movement;
  */
 
 public enum Movement {
-    NONE, SITUPS, SQUATS
+    NONE, SITUP, SQUAT, JUMPING_JACK
 }

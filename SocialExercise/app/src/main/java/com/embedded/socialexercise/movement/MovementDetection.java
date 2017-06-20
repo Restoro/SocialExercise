@@ -4,23 +4,29 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MovementDetection implements SensorEventListener {
     private final SensorManager mSensorManager;
     private final Sensor mAccelerometer;
-    LimitedSizeQueue<SensorData> timeWindow = new LimitedSizeQueue<>(50);
+    private final LimitedSizeQueue<SensorData> timeWindow = new LimitedSizeQueue<>(25);
+    //Use of atomic as its mutable!
+    private final Map<Movement,AtomicInteger> moveCounter;
 
     private Movement currentPrediction = Movement.NONE;
 
-    private final int PREDICTIONCOUNTER = 20;
-    private final int UPDATES = 50;
+    private final int PREDICTION_COUNTER = 20;
+    //Milsec to next update
+    private final int UPDATES = 100;
 
-    private int curPredCounter = PREDICTIONCOUNTER;
+    private int curPredCounter = PREDICTION_COUNTER;
+    private boolean moveUp = false;
 
     private TextView viewToShow;
 
@@ -28,6 +34,15 @@ public class MovementDetection implements SensorEventListener {
         this.mSensorManager = manager;
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.viewToShow = viewToShow;
+        this.moveCounter = new HashMap<>();
+        initMap();
+    }
+
+    private void initMap() {
+        for(Movement m : Movement.values()) {
+            if(m != Movement.NONE)
+                moveCounter.put(m, new AtomicInteger());
+        }
     }
 
     public void onResume() {
@@ -36,6 +51,10 @@ public class MovementDetection implements SensorEventListener {
 
     public void onPause() {
         mSensorManager.unregisterListener(this);
+    }
+
+    public Movement getPrediction() {
+        return currentPrediction;
     }
 
     @Override
@@ -50,16 +69,23 @@ public class MovementDetection implements SensorEventListener {
         long timeStamp = System.currentTimeMillis();
         SensorData lastAddedData = timeWindow.getFirst();
         if(lastAddedData != null){
-            //Update whole Time-Window every 2.5 sec
             if (timeStamp - lastAddedData.getTimeStamp() > UPDATES) {
-                timeWindow.add(new SensorData(timeStamp, x, y, z));
+                SensorData toAdd = new SensorData(timeStamp, x, y, z);
+                timeWindow.add(toAdd);
                 Map<String, Float> quartileMap = quartile(timeWindow.toArray(new SensorData[timeWindow.size()]));
+                sb.append("Last added:" + x + " " + y + " " + z + "\n");
+                //Log.i("Sensor", "Last added:" + x + " " + y + " " + z );
 
                 sb.append("Quartil 1:"+ quartileMap.get("Q1x") + "  " + quartileMap.get("Q1y") + "  " + quartileMap.get("Q1z") + "\n");
                 sb.append("Current mean:" + quartileMap.get("Q2x") + "  " + quartileMap.get("Q2y") + "  " + quartileMap.get("Q2z") + "\n");
                 sb.append("Quartil 3:"+ quartileMap.get("Q3x") + "  " + quartileMap.get("Q3y") + "  " + quartileMap.get("Q3z") + "\n");
                 setPrediction(quartileMap);
-                sb.append("Current Prediction:" + currentPrediction);
+                mapCounterIncrease(toAdd);
+                sb.append("Current Prediction:" + currentPrediction + "\n");
+                for(Map.Entry<Movement,AtomicInteger> entry : moveCounter.entrySet()) {
+                    if(entry.getKey() != Movement.NONE)
+                    sb.append("Move Counter:"  + entry.getKey() + " - " + entry.getValue().get() + "\n");
+                }
                 viewToShow.setText(sb.toString());
             }
         } else {
@@ -68,28 +94,51 @@ public class MovementDetection implements SensorEventListener {
 
     }
 
-    public Movement getPrediction() {
-        return currentPrediction;
+    private void mapCounterIncrease(SensorData current) {
+        switch(currentPrediction) {
+            case SITUP:
+                increaseCounter(inRange(current.getY(), 10, 2),inRange(current.getZ(), 10, 2));
+                break;
+            case SQUAT:
+                increaseCounter(inRange(current.getZ(), 8, 0.5f),inRange(current.getZ(), 11, 0.5f));
+                break;
+            case JUMPING_JACK:
+                //Not working correctly
+                increaseCounter(inRange(current.getX(), 8, 2f),inRange(current.getX(), -8, 2f));
+                break;
+        }
+    }
+
+    private void increaseCounter(boolean upMoveReached, boolean downMoveReached) {
+        if(moveUp && upMoveReached) {
+            moveCounter.get(currentPrediction).incrementAndGet();
+            moveUp = false;
+            Log.i("Sensor","Counter:" + moveCounter);
+        } else if(!moveUp && downMoveReached){
+            moveUp = true;
+        }
     }
 
     private void setPrediction(Map<String, Float> quartileMap) {
-        Movement zwPrediction;
+        Movement zwPrediction = Movement.NONE;
+
         if (isSitup(quartileMap)) {
-            zwPrediction = Movement.SITUPS;
+            zwPrediction = Movement.SITUP;
         } else if (isSquat(quartileMap)) {
-            zwPrediction = Movement.SQUATS;
-        } else {
-            zwPrediction = Movement.NONE;
+            zwPrediction = Movement.SQUAT;
+        } else if(isJumpingJack(quartileMap)) {
+            zwPrediction = Movement.JUMPING_JACK;
         }
 
         if(currentPrediction != zwPrediction) {
             curPredCounter--;
             if (curPredCounter == 0) {
                 currentPrediction = zwPrediction;
-                curPredCounter = PREDICTIONCOUNTER;
+                curPredCounter = PREDICTION_COUNTER;
+                Log.i("Sensor","Prediction:" + currentPrediction);
             }
         } else {
-            curPredCounter = PREDICTIONCOUNTER;
+            curPredCounter = PREDICTION_COUNTER;
         }
     }
 
@@ -140,30 +189,38 @@ public class MovementDetection implements SensorEventListener {
         return returnMap;
     }
 
-    //Not working as intendet!
+    private boolean isJumpingJack(Map<String, Float> quartileMap) {
+
+        boolean rangeY = !inRange(quartileMap.get("Q3y"), quartileMap.get("Q1y"), 3);
+        boolean rangeX = !inRange(quartileMap.get("Q1x"),quartileMap.get("Q3x"),3);
+        return rangeY && rangeX;
+    }
+
+    //Checks if movement is squat
     private boolean isSquat(Map<String, Float> quartileMap) {
-        //Checks if 25% of the data is in range of zero in x-axis (No side movement in situps)
-        boolean rangeQ1Y = inRange(quartileMap.get("Q1y"), 0, 2);
-        boolean rangeQ2Z = inRange(quartileMap.get("Q2z"), 10, 2);
-        boolean rangeQ3Y = inRange(quartileMap.get("Q3y"), 3, 2) && !inRange(quartileMap.get("Q1y"), quartileMap.get("Q3y"), 1f);
-        return rangeQ1Y && rangeQ2Z  && rangeQ3Y;
+        //Phone should online move in z
+        boolean rangeX = inRange(quartileMap.get("Q2x"), 0, 2);
+        boolean rangeY = inRange(quartileMap.get("Q2y"), 0, 2);
+
+        //Quartiles should differ and movement should be recognized
+        boolean rangeZ = !inRange(quartileMap.get("Q1z"), quartileMap.get("Q3z"), 1.5f);
+        return rangeX && rangeY && rangeZ;
     }
 
     //Checks if movement is situp
     private boolean isSitup(Map<String, Float> quartileMap) {
-        //Checks if 25% of the data is in range of zero in x-axis (No side movement in situps)
-        boolean rangeQ1X = inRange(quartileMap.get("Q1x"), 0, 2);
-        //Checks if 25% of the data is smaller than 4 in z-axis (Should be a movement in )
+        //Phone should not move sideways / Phone held in Portrait mode
+        boolean rangeX = inRange(quartileMap.get("Q2x"), 0, 2);
+
+        //Checks if 25% of the data is smaller than 3 in z-axis
         boolean rangeQ1Z = quartileMap.get("Q1z") < 3;
-
-        //Same with Q1 in x-axis
-        boolean rangeQ3X = inRange(quartileMap.get("Q3x"), 0, 2);
-
-        //Checks if Q3 of z and y are approaching the same value (Movement consists of high y and low z and vice versa -> Same Q3 range)
-        boolean rangeQ3YZ = inRange(quartileMap.get("Q3y"), quartileMap.get("Q3z"), 2) && quartileMap.get("Q3z") > 7;
+        //Checks if Q3 of z and y are approaching the same value (Movement consists of high y and low z and vice versa -> ~Same Q3 range)
+        boolean rangeQ3YZ = inRange(quartileMap.get("Q3y"), quartileMap.get("Q3z"), 3);
+        //Checks if Q3 of y is in range of 10, as the movement ends in a upward position
+        boolean rangeQ3Y = inRange(quartileMap.get("Q3y"), 10, 2);
 
         //All of the conditions should be true
-        return rangeQ1X && rangeQ1Z && rangeQ3X && rangeQ3YZ;
+        return rangeX && rangeQ1Z && rangeQ3YZ;
     }
 }
 
