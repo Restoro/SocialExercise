@@ -174,9 +174,9 @@ public class MovementDetection implements SensorEventListener {
         Arrays.sort(vY);
         Arrays.sort(vZ);
 
-        int nQ1 = (int) Math.round(values.length * 25 / 100);
-        int nQ2 = (int) Math.round(values.length * 50 / 100);
-        int nQ3 = (int) Math.round(values.length * 70 / 100);
+        int nQ1 = Math.round(values.length * 25 / 100);
+        int nQ2 = Math.round(values.length * 50 / 100);
+        int nQ3 = Math.round(values.length * 70 / 100);
 
         Map<String, Float> returnMap = new HashMap<>();
         returnMap.put("Q1x",vX[nQ1]);
@@ -234,26 +234,26 @@ class SensorData {
     private float z;
 
 
-    public SensorData(long timeStamp, float x, float y, float z) {
+    protected SensorData(long timeStamp, float x, float y, float z) {
         this.timeStamp = timeStamp;
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public float getX() {
+    protected float getX() {
         return x;
     }
 
-    public float getY() {
+    protected float getY() {
         return y;
     }
 
-    public float getZ() {
+    protected float getZ() {
         return z;
     }
 
-    public long getTimeStamp() {
+    protected long getTimeStamp() {
         return timeStamp;
     }
 }
