@@ -1,5 +1,6 @@
 package com.embedded.socialexercise.gui;
 
+import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -65,6 +67,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                
+            }
+        });
+
         // Add a marker in Sydney and move the camera
         LatLng pos = new LatLng(48.337714, 14.319592);
         Marker m = mMap.addMarker(new MarkerOptions().position(pos));
@@ -109,6 +118,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         p.favouriteActivities = favAct;
         m.setTag(p);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
+        double lonDifference = 25.0/111.32*Math.cos(48.214542*Math.PI/180);
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        builder.include(pos);
+        builder.include(new LatLng(48.214542, 14.228862+lonDifference));
+        builder.include(new LatLng(48.214542, 14.228862-lonDifference));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
     }
 }

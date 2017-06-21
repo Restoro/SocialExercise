@@ -37,7 +37,8 @@
 
         <activity
             android:name=".gui.MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".gui.ChatActivity"></activity>
     </application>
 
 </manifest>

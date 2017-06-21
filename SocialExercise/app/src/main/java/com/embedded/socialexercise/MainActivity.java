@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.embedded.socialexercise.gui.ChatActivity;
 import com.embedded.socialexercise.gui.MapsActivity;
 import com.embedded.socialexercise.movement.MovementDetection;
 
@@ -34,6 +35,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToMaps(View v) {
         Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+    }
+
+    public void goToChat(View v) {
+        Intent intent = new Intent(this, ChatActivity.class);
         startActivity(intent);
     }
 }

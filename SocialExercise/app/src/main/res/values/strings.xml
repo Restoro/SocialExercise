@@ -2,6 +2,7 @@
     <string name="app_name">SocialExercise</string>
     <string name="title_activity_maps">Map</string>
     <string name="btn_map_text">Go to Map</string>
-    <string name="btn_visit_profile_text">Visit Profile</string>
+    <string name="btn_chat_text">Go to Chat</string>
+    <string name="txt_visit_profile_text">Touch me to View Profile</string>
     <string name="img_avatar_text">Avatar Icon</string>
 </resources>
