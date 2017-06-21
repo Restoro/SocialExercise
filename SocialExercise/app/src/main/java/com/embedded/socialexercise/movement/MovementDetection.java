@@ -79,6 +79,7 @@ public class MovementDetection implements SensorEventListener {
                 sb.append("Quartil 1:"+ quartileMap.get("Q1x") + "  " + quartileMap.get("Q1y") + "  " + quartileMap.get("Q1z") + "\n");
                 sb.append("Current mean:" + quartileMap.get("Q2x") + "  " + quartileMap.get("Q2y") + "  " + quartileMap.get("Q2z") + "\n");
                 sb.append("Quartil 3:"+ quartileMap.get("Q3x") + "  " + quartileMap.get("Q3y") + "  " + quartileMap.get("Q3z") + "\n");
+                sb.append("Total" + Math.sqrt((x*x)+(y*y)+(z*z))+"\n");
                 setPrediction(quartileMap);
                 mapCounterIncrease(toAdd);
                 sb.append("Current Prediction:" + currentPrediction + "\n");
@@ -93,6 +94,7 @@ public class MovementDetection implements SensorEventListener {
         }
 
     }
+
 
     private void mapCounterIncrease(SensorData current) {
         switch(currentPrediction) {
