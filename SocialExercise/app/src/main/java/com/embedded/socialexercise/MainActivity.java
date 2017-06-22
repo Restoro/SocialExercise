@@ -13,6 +13,7 @@ import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
 import com.embedded.socialexercise.gui.ChatActivity;
 import com.embedded.socialexercise.gui.MapsActivity;
 import com.embedded.socialexercise.movement.MovementDetection;
+import com.embedded.socialexercise.mqtt.MqttForTesting;
 import com.embedded.socialexercise.position.PositionDetection;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         detection = App.getMovementDetection((TextView)findViewById(R.id.text_view));
+        MqttForTesting.getMqtt();
     }
 
     @Override
