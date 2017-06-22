@@ -4,10 +4,6 @@ import com.embedded.socialexercise.R;
 
 import java.util.List;
 
-/**
- * Created by hoellinger on 21.06.2017.
- */
-
 public class Person {
     public boolean isMale;
     public int avatar;

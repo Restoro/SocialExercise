@@ -5,25 +5,28 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.embedded.socialexercise.movement.enums.Movement;
+import com.embedded.socialexercise.movement.exercise.Exercise;
+import com.embedded.socialexercise.movement.exercise.Situp;
+import com.embedded.socialexercise.movement.exercise.Squat;
+import com.embedded.socialexercise.movement.exercise.ToeTouch;
+import com.embedded.socialexercise.movement.exercise.TrunkRotation;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MovementDetection implements SensorEventListener {
     private final SensorManager mSensorManager;
     private final Sensor mAccelerometer;
-    private final LimitedSizeQueue<SensorData> timeWindow = new LimitedSizeQueue<>(25);
-    //Use of atomic as its mutable!
-    private final Map<Movement,AtomicInteger> moveCounter;
 
+    private final LimitedSizeQueue<SensorData> timeWindow = new LimitedSizeQueue<>(25);
+    private final List<Exercise> exerciseToDetect;
     private Movement currentPrediction = Movement.NONE;
 
     private final int PREDICTION_COUNTER = 20;
@@ -41,19 +44,16 @@ public class MovementDetection implements SensorEventListener {
         this.mSensorManager = manager;
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.viewToShow = viewToShow;
-        this.moveCounter = new HashMap<>();
+        this.exerciseToDetect = new ArrayList<>();
         this.context = con;
         initMap();
     }
 
     private void initMap() {
-        for(Movement m : Movement.values()) {
-            if(m != Movement.NONE)
-                moveCounter.put(m, new AtomicInteger());
-        }
-        File sdCard = Environment.getExternalStorageDirectory();
-        File dir = new File(sdCard,"socialExercise");
-        dir.deleteOnExit();
+        exerciseToDetect.add(new Situp());
+        exerciseToDetect.add(new Squat());
+        exerciseToDetect.add(new ToeTouch());
+        exerciseToDetect.add(new TrunkRotation());
     }
 
     public void onResume() {
@@ -84,27 +84,26 @@ public class MovementDetection implements SensorEventListener {
                 SensorData toAdd = new SensorData(timeStamp, x, y, z);
                 timeWindow.add(toAdd);
                 Map<String, Float> quartileMap = quartile(timeWindow.toArray(new SensorData[timeWindow.size()]));
-                sb.append("Last added:" + x + " " + y + " " + z + "\n");
-                //Log.i("Sensor", "Last added:" + x + " " + y + " " + z );
-
-                sb.append("Quartil 1:"+ quartileMap.get("Q1x") + "  " + quartileMap.get("Q1y") + "  " + quartileMap.get("Q1z") + "\n");
-                sb.append("Current mean:" + quartileMap.get("Q2x") + "  " + quartileMap.get("Q2y") + "  " + quartileMap.get("Q2z") + "\n");
-                sb.append("Quartil 3:"+ quartileMap.get("Q3x") + "  " + quartileMap.get("Q3y") + "  " + quartileMap.get("Q3z") + "\n");
-                sb.append("Total" + Math.sqrt((x*x)+(y*y)+(z*z))+"\n");
                 setPrediction(quartileMap);
                 mapCounterIncrease(toAdd);
                 sb.append("Current Prediction:" + currentPrediction + "\n");
-                for(Map.Entry<Movement,AtomicInteger> entry : moveCounter.entrySet()) {
-                    if(entry.getKey() != Movement.NONE)
-                    sb.append("Move Counter:"  + entry.getKey() + " - " + entry.getValue().get() + "\n");
+                for(Exercise exercise :exerciseToDetect) {
+                    if(exercise.getMovementType() != Movement.NONE)
+                    sb.append("Move Counter:"  + exercise.getMovementType() + " - " + exercise.getMoveCounter() + "\n");
                 }
                 viewToShow.setText(sb.toString());
-                writeToCsvFile(createWriteMessage(toAdd, quartileMap));
             }
         } else {
             timeWindow.add(new SensorData(timeStamp, x, y, z));
         }
+    }
 
+    private String createQuartileMapString(Map<String, Float> quartileMap) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Quartil 1:"+ quartileMap.get("Q1x") + "  " + quartileMap.get("Q1y") + "  " + quartileMap.get("Q1z") + "\n");
+        sb.append("Current mean:" + quartileMap.get("Q2x") + "  " + quartileMap.get("Q2y") + "  " + quartileMap.get("Q2z") + "\n");
+        sb.append("Quartil 3:"+ quartileMap.get("Q3x") + "  " + quartileMap.get("Q3y") + "  " + quartileMap.get("Q3z") + "\n");
+        return sb.toString();
     }
 
     private String createWriteMessage(SensorData cur, Map<String, Float> quartileMap) {
@@ -122,69 +121,26 @@ public class MovementDetection implements SensorEventListener {
         return builder.toString();
     }
 
-    private void writeToCsvFile(String msg) {
-        try {
-            File sdCard = Environment.getExternalStorageDirectory();
-            File dir = new File(sdCard,"socialExercise");
-            //Log.v("Accel", dir.getAbsolutePath());
-
-            File file = new File(dir, "output.csv");
-            FileOutputStream f = new FileOutputStream(file, true);
-
-            try {
-                f.write(msg.getBytes());
-                f.flush();
-                f.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void mapCounterIncrease(SensorData current) {
-        switch(currentPrediction) {
-            case SITUP:
-                increaseCounter(inRange(current.getY(), 10, 2),inRange(current.getZ(), 10, 2));
-                break;
-            case TRUNK_ROTATION:
-                increaseCounter(inRange(current.getTotal(), 8, 0.5f), inRange(current.getTotal(), 15, 0.5f));
-                break;
-            case SQUAT:
-                increaseCounter(inRange(current.getTotal(), 8, 0.5f),inRange(current.getTotal(), 12, 0.5f));
-                break;
-            case TOE_TOUCH:
-                increaseCounter(inRange(current.getTotal(), 8, 0.5f),inRange(current.getTotal(), 12, 0.5f));
-                break;
-        }
-    }
-
-    private void increaseCounter(boolean upMoveReached, boolean downMoveReached) {
-        if(moveUp && upMoveReached) {
-            moveCounter.get(currentPrediction).incrementAndGet();
-            moveUp = false;
-            Log.i("Sensor","Counter:" + moveCounter);
-        } else if(!moveUp && downMoveReached){
-            moveUp = true;
+        for(Exercise exercise : exerciseToDetect) {
+            if(exercise.getMovementType() == currentPrediction) {
+                moveUp = exercise.increaseCounter(moveUp, current);
+                return;
+            }
         }
     }
 
     private void setPrediction(Map<String, Float> quartileMap) {
         Movement zwPrediction = Movement.NONE;
 
-        if (isSitup(quartileMap)) {
-            zwPrediction = Movement.SITUP;
-        } else if(isTrunkRotation(quartileMap)) {
-            zwPrediction = Movement.TRUNK_ROTATION;
-        } else if(isToeTouch(quartileMap)) {
-            zwPrediction = Movement.TOE_TOUCH;
-        } else if (isSquat(quartileMap)) {
-            zwPrediction = Movement.SQUAT;
+        for(Exercise exercise : exerciseToDetect) {
+            if(exercise.isExercise(quartileMap)) {
+                zwPrediction = exercise.getMovementType();
+                break;
+            }
         }
 
+        //Prediction is not instant, instead it needs to stay steady for a specific time
         if(currentPrediction != zwPrediction) {
             curPredCounter--;
             if (curPredCounter == 0) {
@@ -198,15 +154,9 @@ public class MovementDetection implements SensorEventListener {
     }
 
 
-
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
-    }
-
-    private boolean inRange(float number, float range, float offset) {
-        return range-offset <= number && number <= range+offset;
     }
 
     //Returns all 3 Quartiles for all 3 Parameters
@@ -245,101 +195,5 @@ public class MovementDetection implements SensorEventListener {
         returnMap.put("Q3y",vY[nQ3]);
         returnMap.put("Q3z",vZ[nQ3]);
         return returnMap;
-    }
-
-
-
-
-    //Checks if movement is trunk rotation
-    private boolean isTrunkRotation(Map<String, Float> quartileMap) {
-        boolean rangeQ1X = inRange(quartileMap.get("Q1x"), -4, 2);
-        boolean rangeQ3X = inRange(quartileMap.get("Q3x"), -1, 2);
-
-        boolean rangeQ2Y = inRange(quartileMap.get("Q2y"), 0, 3);
-        boolean rangeY = !inRange(quartileMap.get("Q1y"), quartileMap.get("Q3y"), 4);
-
-        boolean rangeQ2Z = inRange(quartileMap.get("Q2z"), 9, 3);
-
-        Log.i("Trunk Rotation" , rangeQ1X + " " + rangeQ3X + " " + rangeQ2Y + " " + rangeY + " " + rangeQ2Z + " " + quartileMap.get("Q1x") + " " + quartileMap.get("Q3x"));
-        return rangeQ1X && rangeQ3X && rangeQ2Y && rangeY && rangeQ2Z;
-    }
-
-    //Checks if movement is toe touch
-    private boolean isToeTouch(Map<String, Float> quartileMap) {
-
-        boolean rangeQ2X = inRange(quartileMap.get("Q2x"), -9, 1.5f);
-        boolean rangeQ2Y = inRange(quartileMap.get("Q2y"), -0.5f, 1);
-
-        boolean rangeQ1z = inRange(quartileMap.get("Q1z"), 0, 2);
-        boolean rangeQ3z = inRange(quartileMap.get("Q3z"), 1, 2);
-
-        return rangeQ2X && rangeQ2Y && rangeQ1z && rangeQ3z;
-    }
-
-    //Checks if movement is squat
-    private boolean isSquat(Map<String, Float> quartileMap) {
-        //Phone should online move in z
-        boolean rangeX = inRange(quartileMap.get("Q2x"), 0, 1.5f);
-        boolean rangeY = inRange(quartileMap.get("Q2y"), 0, 1.5f);
-
-        //Quartiles should differ and movement should be recognized
-        boolean rangeZ = !inRange(quartileMap.get("Q1z"), quartileMap.get("Q3z"), 1.0f);
-        boolean rangeQ1Z = inRange(quartileMap.get("Q1z"), 9, 2);
-        boolean rangeQ3Z = inRange(quartileMap.get("Q3z"), 10.5f, 2);
-        return rangeX && rangeY && rangeZ && rangeQ1Z && rangeQ3Z;
-    }
-
-    //Checks if movement is situp
-    private boolean isSitup(Map<String, Float> quartileMap) {
-        //Phone should not move sideways / Phone held in Portrait mode
-        boolean rangeX = inRange(quartileMap.get("Q2x"), 0, 2);
-
-        //Checks if 25% of the data is smaller than 3 in z-axis
-        boolean rangeQ1Y = inRange(quartileMap.get("Q1y"), 5, 1.5f);
-        boolean rangeQ1Z = inRange(quartileMap.get("Q1z"), 2, 3);
-        //Checks if Q3 of z and y are approaching the same value (Movement consists of high y and low z and vice versa -> ~Same Q3 range)
-        boolean rangeQ3YZ = inRange(quartileMap.get("Q3y"), quartileMap.get("Q3z"), 2);
-        //Checks if Q3 of y is in range of 10, as the movement ends in a upward position
-        boolean rangeQ3Y = inRange(quartileMap.get("Q3y"), 9, 1.5f);
-        boolean rangeQ3Z = inRange(quartileMap.get("Q3z"), 9, 1.5f);
-
-        //All of the conditions should be true
-        return rangeX && rangeQ1Y && rangeQ3YZ && rangeQ3Y && rangeQ3Z;
-    }
-}
-
-
-class SensorData {
-    private long timeStamp;
-    private float x;
-    private float y;
-    private float z;
-
-
-    protected SensorData(long timeStamp, float x, float y, float z) {
-        this.timeStamp = timeStamp;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    protected float getX() {
-        return x;
-    }
-
-    protected float getY() {
-        return y;
-    }
-
-    protected float getZ() {
-        return z;
-    }
-
-    protected float getTotal() {
-        return (float) Math.sqrt((x*x)+(y*y)+(z*z));
-    }
-
-    protected long getTimeStamp() {
-        return timeStamp;
     }
 }

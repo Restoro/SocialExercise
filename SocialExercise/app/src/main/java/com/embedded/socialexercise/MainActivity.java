@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,6 +12,7 @@ import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
 import com.embedded.socialexercise.gui.ChatActivity;
 import com.embedded.socialexercise.gui.MapsActivity;
 import com.embedded.socialexercise.movement.MovementDetection;
+import com.embedded.socialexercise.mqtt.MqttForTesting;
 import com.embedded.socialexercise.position.PositionDetection;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -28,26 +28,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //detection = App.getMovementDetection((TextView)findViewById(R.id.text_view));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //detection.onResume();
+        if(detection != null)
+            detection.onResume();
     }
 
     @Override
     protected  void onPause() {
         super.onPause();
-        detection.onPause();
+        if(detection != null)
+            detection.onPause();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        MainActivityPermissionsDispatcher.debugMovementWithCheck(this);
+        detection = App.getMovementDetection((TextView)findViewById(R.id.text_view));
+        MqttForTesting.getMqtt();
         MainActivityPermissionsDispatcher.registerForLocationUpdatesWithCheck(this);
     }
 
@@ -55,13 +56,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         App.getPositionDetection().onStop();
-    }
-
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    public void debugMovement() {
-        Log.i("Detection","Start");
-        detection = App.getMovementDetection((TextView)findViewById(R.id.text_view));
-        detection.onResume();
     }
 
     @NeedsPermission({Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_COARSE_LOCATION})
