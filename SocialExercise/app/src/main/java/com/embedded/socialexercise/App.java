@@ -31,7 +31,7 @@ public class App extends Application {
 
     public MovementDetection getMovementDetectionInstance(TextView view) {
         if(movementDetection == null)
-            movementDetection = new MovementDetection((SensorManager)getSystemService(SENSOR_SERVICE), view);
+            movementDetection = new MovementDetection(mInstance,(SensorManager)getSystemService(SENSOR_SERVICE), view);
         return movementDetection;
     }
 
