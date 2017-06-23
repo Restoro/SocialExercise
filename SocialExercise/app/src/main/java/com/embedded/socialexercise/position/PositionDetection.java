@@ -54,7 +54,11 @@ public class PositionDetection extends Application implements LocationListener, 
 
     private void updatePositionEventListener(LatLng position) {
         for(OnPositionLocationChangedListener listener : listenerArrayList) {
-            listener.onLocationChanged(position);
+            try {
+                listener.onLocationChanged(position);
+            } catch (Exception e) {
+                listenerArrayList.remove(listener);
+            }
         }
     }
 

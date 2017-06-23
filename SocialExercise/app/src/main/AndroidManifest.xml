@@ -47,7 +47,8 @@
         <activity
             android:name=".gui.MapsActivity"
             android:label="@string/title_activity_maps" />
-        <activity android:name=".gui.ChatActivity"></activity>
+        <activity android:name=".gui.ChatActivity"/>
+        <activity android:name=".gui.MoveActivity"/>
         <service android:name="org.eclipse.paho.android.service.MqttService" >
         </service>
     </application>

@@ -6,8 +6,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import android.widget.TextView;
 
+import com.embedded.socialexercise.R;
+import com.embedded.socialexercise.events.OnMovementChangedListener;
 import com.embedded.socialexercise.movement.enums.Movement;
 import com.embedded.socialexercise.movement.exercise.Exercise;
 import com.embedded.socialexercise.movement.exercise.Situp;
@@ -25,6 +26,8 @@ public class MovementDetection implements SensorEventListener {
     private final SensorManager mSensorManager;
     private final Sensor mAccelerometer;
 
+    private ArrayList<OnMovementChangedListener> listenerArrayList;
+
     private final LimitedSizeQueue<SensorData> timeWindow = new LimitedSizeQueue<>(25);
     private final List<Exercise> exerciseToDetect;
     private Movement currentPrediction = Movement.NONE;
@@ -36,16 +39,14 @@ public class MovementDetection implements SensorEventListener {
     private int curPredCounter = PREDICTION_COUNTER;
     private boolean moveUp = false;
 
-    private TextView viewToShow;
-
     private Context context;
 
-    public MovementDetection(Context con, SensorManager manager, TextView viewToShow) {
+    public MovementDetection(Context con, SensorManager manager) {
         this.mSensorManager = manager;
         this.mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        this.viewToShow = viewToShow;
         this.exerciseToDetect = new ArrayList<>();
         this.context = con;
+        this.listenerArrayList = new ArrayList<>();
         initMap();
     }
 
@@ -66,6 +67,36 @@ public class MovementDetection implements SensorEventListener {
 
     public Movement getPrediction() {
         return currentPrediction;
+    }
+
+    public void addPositionEventListener(OnMovementChangedListener eventListener)
+    {
+        listenerArrayList.add(eventListener);
+    }
+
+    public void removePositionEventListener(OnMovementChangedListener eventListener)
+    {
+        listenerArrayList.remove(eventListener);
+    }
+
+    private void updateMovementPrediction() {
+        for(OnMovementChangedListener listener : listenerArrayList) {
+            try {
+                listener.onMovementPredictionChanged(currentPrediction);
+            } catch (Exception e) {
+                listenerArrayList.remove(listener);
+            }
+        }
+    }
+
+    private void updateMovementCounter(int moveCounter) {
+        for(OnMovementChangedListener listener : listenerArrayList) {
+            try {
+                listener.onMovementCounterIncreased(currentPrediction, moveCounter);
+            } catch (Exception e) {
+                listenerArrayList.remove(listener);
+            }
+        }
     }
 
     @Override
@@ -92,7 +123,6 @@ public class MovementDetection implements SensorEventListener {
                     if(exercise.getMovementType() != Movement.NONE)
                     sb.append("Move Counter:"  + exercise.getMovementType() + " - " + exercise.getMoveCounter() + "\n");
                 }
-                viewToShow.setText(sb.toString());
             }
         } else {
             timeWindow.add(new SensorData(timeStamp, x, y, z));
@@ -125,7 +155,12 @@ public class MovementDetection implements SensorEventListener {
     private void mapCounterIncrease(SensorData current) {
         for(Exercise exercise : exerciseToDetect) {
             if(exercise.getMovementType() == currentPrediction) {
+                int oldMoveCounter = exercise.getMoveCounter();
                 moveUp = exercise.increaseCounter(moveUp, current);
+                if(oldMoveCounter != exercise.getMoveCounter()) {
+                    Log.i("Counter", "Fire!");
+                    updateMovementCounter(exercise.getMoveCounter());
+                }
                 return;
             }
         }
@@ -147,6 +182,7 @@ public class MovementDetection implements SensorEventListener {
             if (curPredCounter == 0) {
                 currentPrediction = zwPrediction;
                 curPredCounter = PREDICTION_COUNTER;
+                updateMovementPrediction();
                 Log.i("Sensor","Prediction:" + currentPrediction);
             }
         } else {
@@ -158,6 +194,16 @@ public class MovementDetection implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
+
+    public int movementToIcon(Movement movement) {
+        switch (movement) {
+            case SITUP: return R.drawable.situp;
+            case SQUAT: return R.drawable.squat;
+            case TOE_TOUCH: return R.drawable.toetouch;
+            case TRUNK_ROTATION: return R.drawable.trunkrotation;
+        }
+        return -1;
     }
 
     //Returns all 3 Quartiles for all 3 Parameters

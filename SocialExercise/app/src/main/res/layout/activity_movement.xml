@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/move_linear_layout">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/workout_button"
+        android:text="Start Workout"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:onClick="startStopWorkout"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/workout_title"
+        android:text="Current:"
+        android:padding="5dp"
+        android:textSize="24sp"
+        android:layout_below="@id/workout_button"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/workout_predicition"
+        android:text="No movement detected"
+        android:textSize="24sp"
+        android:padding="5dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/workout_button"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/workout_your_workout_title"
+        android:text="Your Workout:"
+        android:padding="5dp"
+        android:paddingTop="15dp"
+        android:textSize="24sp"
+        android:layout_below="@id/workout_title" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@android:color/holo_blue_dark"
+        android:id="@+id/workout_divider"
+        android:layout_alignBottom="@id/workout_your_workout_title" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/workout_item_list"
+        android:layout_below="@id/workout_divider"
+        android:scrollbars="vertical">
+    </LinearLayout>
+
+
+</RelativeLayout>

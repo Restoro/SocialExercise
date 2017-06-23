@@ -2,7 +2,6 @@ package com.embedded.socialexercise;
 
 import android.app.Application;
 import android.hardware.SensorManager;
-import android.widget.TextView;
 
 import com.embedded.socialexercise.movement.MovementDetection;
 import com.embedded.socialexercise.position.PositionDetection;
@@ -29,9 +28,9 @@ public class App extends Application {
         return positionDetection;
     }
 
-    public MovementDetection getMovementDetectionInstance(TextView view) {
+    public MovementDetection getMovementDetectionInstance() {
         if(movementDetection == null)
-            movementDetection = new MovementDetection(mInstance,(SensorManager)getSystemService(SENSOR_SERVICE), view);
+            movementDetection = new MovementDetection(mInstance,(SensorManager)getSystemService(SENSOR_SERVICE));
         return movementDetection;
     }
 
@@ -39,7 +38,7 @@ public class App extends Application {
         return getInstance().getPositionDetectionInstance();
     }
 
-    public static MovementDetection getMovementDetection(TextView view) {
-        return  getInstance().getMovementDetectionInstance(view);
+    public static MovementDetection getMovementDetection() {
+        return  getInstance().getMovementDetectionInstance();
     }
 }

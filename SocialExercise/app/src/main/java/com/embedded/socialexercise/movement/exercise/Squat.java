@@ -1,8 +1,8 @@
 package com.embedded.socialexercise.movement.exercise;
 
 import com.embedded.socialexercise.helper.Helper;
-import com.embedded.socialexercise.movement.enums.Movement;
 import com.embedded.socialexercise.movement.SensorData;
+import com.embedded.socialexercise.movement.enums.Movement;
 
 import java.util.Map;
 
@@ -10,7 +10,7 @@ public class Squat extends Exercise {
     @Override
     public boolean isExercise(Map<String, Float> quartileMap) {
         //Phone should online move in z
-        boolean rangeX = Helper.inRange(quartileMap.get("Q2x"), 0, 1.5f);
+        boolean rangeX = Helper.inRange(quartileMap.get("Q2x"), 0, 3f);
         boolean rangeY = Helper.inRange(quartileMap.get("Q2y"), 0, 1.5f);
 
         //Quartiles should differ and movement should be recognized

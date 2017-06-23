@@ -6,12 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.TextView;
 
 import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
 import com.embedded.socialexercise.gui.ChatActivity;
 import com.embedded.socialexercise.gui.MapsActivity;
-import com.embedded.socialexercise.movement.MovementDetection;
+import com.embedded.socialexercise.gui.MoveActivity;
 import com.embedded.socialexercise.mqtt.MqttForTesting;
 import com.embedded.socialexercise.position.PositionDetection;
 import com.google.android.gms.maps.model.LatLng;
@@ -21,10 +20,8 @@ import permissions.dispatcher.RuntimePermissions;
 
 @RuntimePermissions
 public class MainActivity extends AppCompatActivity {
-    MovementDetection detection;
 
     @Override
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -44,19 +41,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        detection = App.getMovementDetection((TextView)findViewById(R.id.text_view));
+
         MqttForTesting.getMqtt();
         MainActivityPermissionsDispatcher.registerForLocationUpdatesWithCheck(this);
-        if(detection != null)
-            detection.onStart();
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         App.getPositionDetection().onStop();
-        if(detection != null)
-            detection.onStop();
+
     }
 
     @NeedsPermission({Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_COARSE_LOCATION})
@@ -77,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // NOTE: delegate the permission handling to generated method
         MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    public void goToMove(View v) {
+        Intent intent = new Intent(this, MoveActivity.class);
+        startActivity(intent);
     }
 
     public void goToMaps(View v) {
