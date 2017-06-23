@@ -1,7 +1,5 @@
 package com.embedded.socialexercise.gui;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -12,11 +10,15 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 
 import com.embedded.socialexercise.R;
 import com.embedded.socialexercise.events.OnMessageReceivedListener;
 import com.embedded.socialexercise.mqtt.IMqtt;
 import com.embedded.socialexercise.mqtt.Message;
+import com.embedded.socialexercise.mqtt.MqttForTesting;
 import com.embedded.socialexercise.mqtt.MqttImpl;
 
 public class ChatActivity extends AppCompatActivity implements OnMessageReceivedListener, AdapterView.OnItemSelectedListener {
