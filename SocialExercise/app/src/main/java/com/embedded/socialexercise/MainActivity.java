@@ -33,15 +33,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(detection != null)
-            detection.onResume();
+
     }
 
     @Override
     protected  void onPause() {
         super.onPause();
-        if(detection != null)
-            detection.onPause();
     }
 
     @Override
@@ -50,12 +47,16 @@ public class MainActivity extends AppCompatActivity {
         detection = App.getMovementDetection((TextView)findViewById(R.id.text_view));
         MqttForTesting.getMqtt();
         MainActivityPermissionsDispatcher.registerForLocationUpdatesWithCheck(this);
+        if(detection != null)
+            detection.onStart();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         App.getPositionDetection().onStop();
+        if(detection != null)
+            detection.onStop();
     }
 
     @NeedsPermission({Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_COARSE_LOCATION})

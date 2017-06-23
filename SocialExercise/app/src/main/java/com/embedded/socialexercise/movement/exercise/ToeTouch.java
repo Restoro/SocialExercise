@@ -1,8 +1,8 @@
 package com.embedded.socialexercise.movement.exercise;
 
 import com.embedded.socialexercise.helper.Helper;
-import com.embedded.socialexercise.movement.enums.Movement;
 import com.embedded.socialexercise.movement.SensorData;
+import com.embedded.socialexercise.movement.enums.Movement;
 
 import java.util.Map;
 
@@ -25,6 +25,6 @@ public class ToeTouch extends Exercise {
 
     @Override
     public boolean increaseCounter(boolean moveUp, SensorData current) {
-        return checkCurForCounter(moveUp, Helper.inRange(current.getTotal(), 8, 0.5f), Helper.inRange(current.getZ(), 12, 0.5f));
+        return checkCurForCounter(moveUp, Helper.inRange(current.getTotal(), 8, 1f), Helper.inRange(current.getTotal(), 12, 1f));
     }
 }

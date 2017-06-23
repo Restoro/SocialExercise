@@ -56,11 +56,11 @@ public class MovementDetection implements SensorEventListener {
         exerciseToDetect.add(new TrunkRotation());
     }
 
-    public void onResume() {
+    public void onStart() {
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL );
     }
 
-    public void onPause() {
+    public void onStop() {
         mSensorManager.unregisterListener(this);
     }
 
@@ -87,6 +87,7 @@ public class MovementDetection implements SensorEventListener {
                 setPrediction(quartileMap);
                 mapCounterIncrease(toAdd);
                 sb.append("Current Prediction:" + currentPrediction + "\n");
+                sb.append(createQuartileMapString(quartileMap));
                 for(Exercise exercise :exerciseToDetect) {
                     if(exercise.getMovementType() != Movement.NONE)
                     sb.append("Move Counter:"  + exercise.getMovementType() + " - " + exercise.getMoveCounter() + "\n");
@@ -160,7 +161,7 @@ public class MovementDetection implements SensorEventListener {
     }
 
     //Returns all 3 Quartiles for all 3 Parameters
-    public Map<String, Float> quartile(SensorData[] values) {
+    private Map<String, Float> quartile(SensorData[] values) {
 
         if (values == null || values.length == 0) {
             throw new IllegalArgumentException("The data array either is null or does not contain any data.");

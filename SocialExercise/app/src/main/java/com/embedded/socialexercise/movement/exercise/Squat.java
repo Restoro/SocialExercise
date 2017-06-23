@@ -27,6 +27,6 @@ public class Squat extends Exercise {
 
     @Override
     public boolean increaseCounter(boolean moveUp, SensorData current) {
-        return checkCurForCounter(moveUp, Helper.inRange(current.getTotal(), 8, 0.5f), Helper.inRange(current.getZ(), 12, 0.5f));
+        return checkCurForCounter(moveUp, Helper.inRange(current.getTotal(), 8, 1f), Helper.inRange(current.getTotal(), 12, 1f));
     }
 }

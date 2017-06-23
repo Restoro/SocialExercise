@@ -14,7 +14,8 @@ public abstract class Exercise {
     //Returns if moveUp should change
     public abstract boolean increaseCounter(boolean moveUp, SensorData current);
 
-    public boolean checkCurForCounter(boolean moveUp, boolean checkUp, boolean checkDown) {
+    protected boolean checkCurForCounter(boolean moveUp, boolean checkUp, boolean checkDown) {
+
         if(moveUp && checkUp) {
             moveCounter++;
             return false;
