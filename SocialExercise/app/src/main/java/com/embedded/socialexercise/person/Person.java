@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Person {
     public boolean isMale;
+    public String mqttID;
     public int avatar;
     public float longitude;
     public float latitude;

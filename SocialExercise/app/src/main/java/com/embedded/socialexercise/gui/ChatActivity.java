@@ -13,20 +13,49 @@ import android.widget.TextView;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
-
+import com.embedded.socialexercise.App;
 import com.embedded.socialexercise.R;
 import com.embedded.socialexercise.events.OnMessageReceivedListener;
-import com.embedded.socialexercise.mqtt.IMqtt;
+import com.embedded.socialexercise.events.OnPositionReceivedListener;
 import com.embedded.socialexercise.mqtt.Message;
-import com.embedded.socialexercise.mqtt.MqttForTesting;
-import com.embedded.socialexercise.mqtt.MqttImpl;
+import com.embedded.socialexercise.mqtt.MqttDetection;
+import com.google.android.gms.maps.model.LatLng;
 
-public class ChatActivity extends AppCompatActivity implements OnMessageReceivedListener, AdapterView.OnItemSelectedListener {
-
+public class ChatActivity extends AppCompatActivity implements OnMessageReceivedListener, OnPositionReceivedListener, AdapterView.OnItemSelectedListener {
+    private MqttDetection detection;
     private LinearLayout contMsgs;
     private ScrollView scrV;
-    private IMqtt mqtt;
-    private String sender = null;
+    private String sender = "Anonymous";
+    private LatLng position = new LatLng(0.0,0.0);
+    private double MESSAGE_RANGE = 0.3d;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        registerForMqtt();
+    }
+
+    private void registerForMqtt(){
+        detection = App.getMqttDetection();
+        if (detection != null) {
+            detection.addOnPositionReceivedListener(this);
+            detection.addOnMessageReceivedListener(this);
+        }
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        unregisterForMqtt();
+    }
+
+    private void unregisterForMqtt() {
+        if (detection != null) {
+            detection.removeOnMessageReceivedListener(this);
+            detection.removeOnPositionReceivedListener(this);
+            detection.close();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,50 +63,31 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
         setContentView(R.layout.activity_chat);
         scrV = (ScrollView) findViewById(R.id.scrvMsgs);
         contMsgs = (LinearLayout) findViewById(R.id.contMsgs);
-        mqtt = new MqttImpl();
-        mqtt.addOnMessageReceivedListener(this);
         Spinner spinner = (Spinner) findViewById(R.id.spinner3);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.chat_choices, android.R.layout.simple_spinner_item);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
-
         final EditText txt = new EditText(this);
-        txt.setHint("USERNAME");
+        txt.setHint("Anonymous");
         new AlertDialog.Builder(this)
-            .setMessage("   ENTER YOUR USERNAME HERE!")
-            .setView(txt)
-            .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
-               public void onClick(DialogInterface dialog, int whichButton) {
-                  String name = txt.getText().toString();
-                  setSender(name);
-               }
-            }).show();
-
-
-    }
-
-    private void setSender(String name){
-        this.sender = name;
-        ((MqttImpl)mqtt).setSender(sender);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        ((MqttImpl)mqtt).close();
-        mqtt.removeOnMessageReceivedListener(this);
+                .setMessage("   ENTER YOUR USERNAME HERE!")
+                .setView(txt)
+                .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        sender = txt.getText().toString();
+                    }
+                }).show();
     }
 
     public void onSendMsgClick(View v) {
         EditText txt = (EditText) findViewById(R.id.txtNewMsg);
-      //  TextView name = (TextView) findViewById(R.id.txtMsgName);
         String msg = txt.getText().toString();
-       // String sender = name.getText().toString();
-        if(!msg.equals("")) {
-            addMessageView(getMyMessageView(mqtt.sendMessage(msg)));
+        if (!msg.equals("")) {
+            detection.setSender(sender);
+            detection.sendMessage(msg);
             txt.setText(new char[0], 0, 0);
         }
     }
@@ -85,7 +95,7 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         contMsgs.removeAllViews();
-        for(Message msg : mqtt.setTopic((String) adapterView.getItemAtPosition(i))){
+        for (Message msg : detection.setTopic((String) adapterView.getItemAtPosition(i))) {
             contMsgs.addView(getMessageView(msg));
         }
         scrollToBottom();
@@ -98,8 +108,13 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
 
     @Override
     public void messageRecieved(Message msg) {
-        if(!sender.equals(msg.sender)){
-            final View v = getMessageView(msg);
+       if (isInRange(msg)) {
+            final View v;
+            if((detection.getClientId()).equals(msg.id)){
+                v = getMyMessageView(msg);
+            }else{
+                v = getMessageView(msg);
+            }
             contMsgs.post(new Runnable() {
                 @Override
                 public void run() {
@@ -107,6 +122,10 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
                 }
             });
         }
+    }
+
+    private boolean isInRange(Message msg){
+        return ((Math.abs(msg.latitude-this.position.latitude) <= MESSAGE_RANGE)&& (Math.abs(msg.longitude-this.position.longitude) < MESSAGE_RANGE));
     }
 
     private View getMessageView(Message msg) {
@@ -125,12 +144,12 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
         return v;
     }
 
-    private void addMessageView(View msg){
+    private void addMessageView(View msg) {
         contMsgs.addView(msg);
         scrollToBottom();
     }
 
-    private void scrollToBottom(){
+    private void scrollToBottom() {
         scrV.post(new Runnable() {
 
             @Override
@@ -139,4 +158,13 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
             }
         });
     }
+
+    @Override
+    public void positionRecieved(LatLng position, String id) {
+        if(detection.getClientId().equals(id)){
+            this.position = position;
+        }
+        this.position = position;
+    }
+
 }

@@ -1,14 +1,16 @@
 package com.embedded.socialexercise.gui;
 
-import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.embedded.socialexercise.App;
 import com.embedded.socialexercise.R;
+import com.embedded.socialexercise.events.OnPositionReceivedListener;
 import com.embedded.socialexercise.helper.Helper;
+import com.embedded.socialexercise.mqtt.MqttDetection;
 import com.embedded.socialexercise.person.Person;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,23 +21,35 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnPositionReceivedListener {
 
     private GoogleMap mMap;
+    private ArrayList<Marker> markers = new ArrayList<>();
+    private MqttDetection detection;
+    private SupportMapFragment mapFragment;
+
+    LatLngBounds.Builder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        detection = App.getMqttDetection();
+        detection.addOnPositionReceivedListener(this);
+    }
 
     /**
      * Manipulates the map once available.
@@ -66,7 +80,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return v;
             }
         });
-
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -79,6 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Marker m = mMap.addMarker(new MarkerOptions().position(pos));
         Person p = new Person();
         p.firstName = "Niki";
+        p.mqttID = "paho39p4873294827";
         p.address = "Linz";
         p.isMale = true;
         p.avatar = 0;
@@ -88,6 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         favAct.add("Squads");
         p.favouriteActivities = favAct;
         m.setTag(p);
+
 
 
         pos = new LatLng(48.159067, 14.033028);
@@ -118,11 +133,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         p.favouriteActivities = favAct;
         m.setTag(p);
 
+
         double lonDifference = 25.0/111.32*Math.cos(48.214542*Math.PI/180);
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        builder.include(pos);
+        builder = new LatLngBounds.Builder();
+       // builder.include(pos);
         builder.include(new LatLng(48.214542, 14.228862+lonDifference));
         builder.include(new LatLng(48.214542, 14.228862-lonDifference));
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
     }
+
+
+    //TODO does not work yet
+    @Override
+    public void positionRecieved(LatLng position, String id) {
+        for(Marker m : markers){
+            Person p = (Person)m.getTag();
+            if(id.equals(p.mqttID)){
+                m.remove();
+                markers.remove(m);
+                m = mMap.addMarker(new MarkerOptions().position(position));
+                m.setTag(p);
+                markers.add(m);
+                return;
+            }
+        }
+
+        Marker m = mMap.addMarker(new MarkerOptions().position(position));
+        Person p = new Person();
+        p.firstName = "Pazi";
+        p.mqttID = id;
+        p.address = "Wels";
+        p.isMale = true;
+        p.avatar = 4;
+        List<String> favAct = new ArrayList<>();
+        favAct = new ArrayList<>();
+        favAct.add("Tennis");
+        favAct.add("Push-ups");
+        favAct.add("Squads");
+        p.favouriteActivities = favAct;
+        m.setTag(p);
+        markers.add(m);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+        Log.i("Map","Added new position");
+    }
+
 }

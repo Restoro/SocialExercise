@@ -11,7 +11,7 @@ import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
 import com.embedded.socialexercise.gui.ChatActivity;
 import com.embedded.socialexercise.gui.MapsActivity;
 import com.embedded.socialexercise.gui.MoveActivity;
-import com.embedded.socialexercise.mqtt.MqttForTesting;
+import com.embedded.socialexercise.mqtt.MqttDetection;
 import com.embedded.socialexercise.position.PositionDetection;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -20,6 +20,7 @@ import permissions.dispatcher.RuntimePermissions;
 
 @RuntimePermissions
 public class MainActivity extends AppCompatActivity {
+    MqttDetection mqttDetection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +42,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        MqttForTesting.getMqtt();
+        mqttDetection = App.getMqttDetection();
         MainActivityPermissionsDispatcher.registerForLocationUpdatesWithCheck(this);
 
     }
@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         App.getPositionDetection().onStop();
-
     }
 
     @NeedsPermission({Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_COARSE_LOCATION})
@@ -61,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLocationChanged(LatLng position) {
                 String msg = "Updated position \n" + position.latitude + " " + position.longitude;
+                mqttDetection.sendPosition(position);
                 //Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
             }
         });
