@@ -1,7 +1,7 @@
 package com.embedded.socialexercise.movement.enums;
 
 public enum Movement {
-    NONE("No Exercise detected"), SITUP("Situp"), SQUAT("Squat"), TOE_TOUCH("Toe touch"), TRUNK_ROTATION("Trunk rotation");
+    NONE("Detecting Movement..."), SITUP("Situp"), SQUAT("Squat"), TOE_TOUCH("Toe touch"), TRUNK_ROTATION("Trunk rotation");
 
     private final String name;
 

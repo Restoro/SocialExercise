@@ -1,54 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/move_linear_layout">
 
-    <Button
+
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view_current_prediction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/workout_button"
-        android:text="Start Workout"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:padding="5dp"
-        android:onClick="startStopWorkout"
-        />
+        card_view:cardUseCompatPadding="true"
+        card_view:cardCornerRadius="4dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/workout_title"
-        android:text="Current:"
-        android:padding="5dp"
-        android:textSize="24sp"
-        android:layout_below="@id/workout_button"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#fff"
+            android:elevation="4dp"
+            android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/workout_predicition"
-        android:text="No movement detected"
-        android:textSize="24sp"
-        android:padding="5dp"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/workout_button"/>
+
+            <ImageView
+                android:id="@+id/cardview_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="18dp"
+                android:background="@drawable/hantel"/>
+
+            <TextView
+                android:id="@+id/cardview_current_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_toEndOf="@+id/cardview_image"
+                android:visibility="invisible"
+                android:text="Current:"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/card_textview_current_prediction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_alignParentRight="true"
+                android:text="No Workout started!"
+                android:textSize="24sp" />
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/workout_your_workout_title"
         android:text="Your Workout:"
-        android:padding="5dp"
-        android:paddingTop="15dp"
+        android:padding="10dp"
         android:textSize="24sp"
-        android:layout_below="@id/workout_title" />
+        android:layout_below="@+id/card_view_current_prediction"
+        android:layout_alignParentStart="true" />
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/workout_button"
+        android:src="@drawable/hantel"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        app:backgroundTint="@color/cardview_light_background"
+        android:onClick="startStopWorkout"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/workout_options_button"
+        android:src="@drawable/choice"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        app:backgroundTint="@color/cardview_light_background"
+        android:onClick="showAllExercises"
+        />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="3dp"
         android:background="@android:color/holo_blue_dark"
         android:id="@+id/workout_divider"
+
         android:layout_alignBottom="@id/workout_your_workout_title" />
 
     <LinearLayout
