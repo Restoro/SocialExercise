@@ -94,13 +94,6 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        Object o = menu.getItem(0);
-        return true;
-    }
-
-    @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         contMsgs.removeAllViews();
         for (Message msg : detection.setTopic((String) adapterView.getItemAtPosition(i))) {
