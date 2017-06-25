@@ -7,5 +7,4 @@ public class Message {
     public String time;
     public String message;
     public String topic;
-
 }

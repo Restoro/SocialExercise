@@ -21,6 +21,8 @@ import com.embedded.socialexercise.mqtt.Message;
 import com.embedded.socialexercise.mqtt.MqttDetection;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.List;
+
 public class ChatActivity extends BasicMenuActivity implements OnMessageReceivedListener, OnPositionReceivedListener, AdapterView.OnItemSelectedListener {
     private MqttDetection detection;
     private LinearLayout contMsgs;
@@ -96,8 +98,15 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         contMsgs.removeAllViews();
-        for (Message msg : detection.setTopic((String) adapterView.getItemAtPosition(i))) {
-            contMsgs.addView(getMessageView(msg));
+        List<Message> msgs = detection.setTopic((String) adapterView.getItemAtPosition(i));
+        if(msgs!=null) {
+            for (Message msg : msgs) {
+                if(msg.id.equals(detection.getClientId())){
+                    contMsgs.addView(getMyMessageView(msg));
+                } else {
+                    contMsgs.addView(getMessageView(msg));
+                }
+            }
         }
         scrollToBottom();
     }

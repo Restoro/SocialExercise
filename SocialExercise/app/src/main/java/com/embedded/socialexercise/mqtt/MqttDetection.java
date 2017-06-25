@@ -22,6 +22,9 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
     private Context context;
@@ -35,6 +38,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
     private ArrayList<OnMessageReceivedListener> listeners = new ArrayList<>();
     private ArrayList<OnPositionReceivedListener> listenersPos = new ArrayList<>();
     private LatLng position = new LatLng(0.0,0.0);
+    private Map<String, List<Message>> memory = new HashMap<>();
 
 
     public MqttDetection(Context con) {
@@ -91,8 +95,8 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
                         m.topic = topic;
                         m.time = String.valueOf(getCurrentTimeStamp());
 
-                        //TODO remove after debugging
-                      //  m.message = msg;
+                        saveMessageInMemory(m);
+
                         fireOnMessageReceived(m);
                     }
 
@@ -128,6 +132,15 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         }
     }
 
+    private void saveMessageInMemory(Message m){
+        List<Message> msgs = memory.get(m.topic);
+        if(msgs == null) {
+            msgs = new ArrayList<>();
+            memory.put(m.topic, msgs);
+        }
+        msgs.add(m);
+    }
+
     private void subscribeToTopic(String topic, int qos) {
         try {
             Log.i("MQTT", "Subscribe to topic:" + topic);
@@ -160,18 +173,16 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         if (!connected) {
             new MqttDetection(context);
         }
-            String m = Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId+";"+sender+";"+msg;
-            Log.i("MQTT", "Sending msg to" + topic);
-            MqttMessage message = new MqttMessage(m.getBytes());
-            message.setQos(qos);
-            try {
-                IMqttDeliveryToken publish = sampleClient.publish(topic, message);
-                publish.getMessage();
-            } catch (MqttException e) {
-                Log.e("MQTT", e.getMessage());
-            }
-
-
+        String m = Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId+";"+sender+";"+msg;
+        Log.i("MQTT", "Sending msg to" + topic);
+        MqttMessage message = new MqttMessage(m.getBytes());
+        message.setQos(qos);
+        try {
+            IMqttDeliveryToken publish = sampleClient.publish(topic, message);
+            publish.getMessage();
+        } catch (MqttException e) {
+            Log.e("MQTT", e.getMessage());
+        }
     }
 
     public synchronized void close() {
@@ -188,14 +199,14 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
     }
 
     @Override
-    public Message[] setTopic(String topic) {
+    public List<Message> setTopic(String topic) {
         if (topic.equals("SocialExercise")) {
             this.topic = topic;
         } else {
             this.topic = "SocialExercise" + topic;
             subscribeToTopic(this.topic, qos);
         }
-        return new Message[0];
+        return memory.get(this.topic);
     }
 
     @Override
