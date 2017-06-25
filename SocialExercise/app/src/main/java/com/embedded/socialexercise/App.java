@@ -39,6 +39,8 @@ public class App extends Application {
     public MqttDetection getMqttDetectionInstance(){
         if(mqttDetection == null)
             mqttDetection = new MqttDetection(mInstance);
+        else if(!mqttDetection.isConnected())
+            mqttDetection.connect();
         return mqttDetection;
     }
 

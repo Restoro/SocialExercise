@@ -57,18 +57,20 @@ public class PositionDetection extends Application implements LocationListener, 
             try {
                 listener.onLocationChanged(position);
             } catch (Exception e) {
-                listenerArrayList.remove(listener);
+                Log.e("PositionDetection", e.getMessage());
             }
         }
     }
 
     public void onStart() {
         if(PermissionUtils.hasSelfPermissions(context, PERMISSION)) {
+            Log.i("Position Detection", "Start");
             mGoogleApiClient.connect();
         }
     }
 
     public void onStop() {
+        Log.i("Position Detection", "Stop");
         if(mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 
@@ -97,7 +99,7 @@ public class PositionDetection extends Application implements LocationListener, 
     protected void startLocationUpdates() throws SecurityException{
         // Create the location request
         mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_LOW_POWER)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(UPDATE_INTERVAL)
                 .setFastestInterval(FASTEST_INTERVAL);
         // Request location updates

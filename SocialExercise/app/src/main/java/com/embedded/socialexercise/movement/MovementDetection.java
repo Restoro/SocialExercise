@@ -84,7 +84,6 @@ public class MovementDetection implements SensorEventListener {
             try {
                 listener.onMovementPredictionChanged(currentPrediction);
             } catch (Exception e) {
-                listenerArrayList.remove(listener);
             }
         }
     }
@@ -94,7 +93,6 @@ public class MovementDetection implements SensorEventListener {
             try {
                 listener.onMovementCounterIncreased(currentPrediction, moveCounter);
             } catch (Exception e) {
-                listenerArrayList.remove(listener);
             }
         }
     }

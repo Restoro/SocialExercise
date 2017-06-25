@@ -40,6 +40,7 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
         if (detection != null) {
             detection.addOnPositionReceivedListener(this);
             detection.addOnMessageReceivedListener(this);
+            position = detection.getOwnPosition();
         }
     }
 

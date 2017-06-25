@@ -1,10 +1,13 @@
 package com.embedded.socialexercise.mqtt;
 
-import com.embedded.socialexercise.events.OnMessageReceivedListener;
-import com.embedded.socialexercise.events.OnPositionReceivedListener;
-import com.google.android.gms.maps.model.LatLng;
 import android.content.Context;
 import android.util.Log;
+
+import com.embedded.socialexercise.App;
+import com.embedded.socialexercise.events.OnMessageReceivedListener;
+import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
+import com.embedded.socialexercise.events.OnPositionReceivedListener;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -20,11 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by Verena on 24.06.2017.
- */
-
-public class MqttDetection implements IMqtt {
+public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
     private Context context;
     private String broker;
     private String clientId;
@@ -44,6 +43,16 @@ public class MqttDetection implements IMqtt {
         this.clientId = MqttAsyncClient.generateClientId();
         this.topic = "SocialExercise";
         setup();
+    }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public void connect() {
+        if(!connected) {
+            setup();
+        }
     }
 
     private void setup(){
@@ -100,6 +109,7 @@ public class MqttDetection implements IMqtt {
             sampleClient.connect(connOpts, null, new IMqttActionListener() {
 
                 public void onSuccess(IMqttToken asyncActionToken) {
+
                     subscribeToTopic(topic, qos);
                     connected = true;
                 }
@@ -109,6 +119,8 @@ public class MqttDetection implements IMqtt {
                     connected = false;
                 }
             });
+
+            App.getPositionDetection().addPositionEventListener(this);
 
         } catch (MqttException me) {
             Log.e("MQTT", me.getMessage());
@@ -126,21 +138,19 @@ public class MqttDetection implements IMqtt {
 
     @Override
     public void sendPosition(LatLng position){
-        if (!connected) {
-            setup();
-        }
+        this.connect();
 
-            Log.i("MQTT", "Sending pos");
-            this.position = position;
-            String p = "Position;" + Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId;
-            MqttMessage message = new MqttMessage(p.getBytes());
-            message.setQos(qos);
-            try {
-                IMqttDeliveryToken publish = sampleClient.publish(topic, message);
-                publish.getMessage();
-            } catch (MqttException e) {
-                Log.e("MQTT", e.getMessage());
-            }
+        Log.i("MQTT", "Sending pos");
+        this.position = position;
+        String p = "Position;" + Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId;
+        MqttMessage message = new MqttMessage(p.getBytes());
+        message.setQos(qos);
+        try {
+            IMqttDeliveryToken publish = sampleClient.publish(topic, message);
+            publish.getMessage();
+        } catch (MqttException e) {
+            Log.e("MQTT", e.getMessage());
+        }
 
     }
 
@@ -171,6 +181,7 @@ public class MqttDetection implements IMqtt {
             } catch (MqttException e) {
                 Log.e("MQTT", e.getMessage());
             }
+            App.getPositionDetection().removePositionEventListener(this);
         }
 
     }
@@ -213,7 +224,6 @@ public class MqttDetection implements IMqtt {
                 listener.messageRecieved(msg);
             } catch (Exception e) {
                 Log.e("MQTT", e.getMessage());
-                listeners.remove(listener);
             }
         }
     }
@@ -225,7 +235,6 @@ public class MqttDetection implements IMqtt {
                 listener.positionRecieved(p,id);
             } catch (Exception e) {
                 Log.e("MQTT", e.getMessage());
-                listenersPos.remove(listener);
             }
         }
     }
@@ -243,5 +252,15 @@ public class MqttDetection implements IMqtt {
 
     public String getClientId(){
         return  clientId;
+    }
+
+    @Override
+    public void onLocationChanged(LatLng position) {
+        if(connected)
+            this.sendPosition(position);
+    }
+
+    public LatLng getOwnPosition() {
+        return position;
     }
 }
