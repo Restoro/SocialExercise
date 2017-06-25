@@ -39,9 +39,12 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".gui.ChatActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"/>
         <activity android:name=".gui.MoveActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"
+            android:keepScreenOn="true"/>
 
         <service android:name="org.eclipse.paho.android.service.MqttService"></service>
 

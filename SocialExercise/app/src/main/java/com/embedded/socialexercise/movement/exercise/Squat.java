@@ -1,5 +1,7 @@
 package com.embedded.socialexercise.movement.exercise;
 
+import android.util.Log;
+
 import com.embedded.socialexercise.helper.Helper;
 import com.embedded.socialexercise.movement.SensorData;
 import com.embedded.socialexercise.movement.enums.Movement;
@@ -17,6 +19,7 @@ public class Squat extends Exercise {
         boolean rangeZ = !Helper.inRange(quartileMap.get("Q1z"), quartileMap.get("Q3z"), 1.0f);
         boolean rangeQ1Z = Helper.inRange(quartileMap.get("Q1z"), 9, 2);
         boolean rangeQ3Z = Helper.inRange(quartileMap.get("Q3z"), 10.5f, 2);
+        Log.i("Movement", rangeX + " " + rangeY + " " + rangeZ + " " + rangeQ1Z + " " + rangeQ3Z);
         return rangeX && rangeY && rangeZ && rangeQ1Z && rangeQ3Z;
     }
 
