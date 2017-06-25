@@ -41,6 +41,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
     private ArrayList<OnPositionReceivedListener> listenersPos = new ArrayList<>();
     private LatLng position = new LatLng(0.0,0.0);
     private Map<String, List<Message>> memory = new HashMap<>();
+    private List<String> topics = new ArrayList<>();
 
 
     public MqttDetection(Context con) {
@@ -48,6 +49,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         this.broker = "tcp://iot.eclipse.org:1883";
         this.clientId = MqttAsyncClient.generateClientId();
         this.topic = "SocialExercise";
+        topics.add(topic);
         setup();
     }
 
@@ -252,6 +254,12 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
             }
         }
     }
+
+    public void addTopic(String topic) {
+        topics.add(topic);
+    }
+
+    public List<String> getTopics(){ return topics;}
 
     public static String getCurrentTimeStamp() {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -12,6 +12,7 @@ import com.embedded.socialexercise.R;
 import com.embedded.socialexercise.events.OnMovementChangedListener;
 import com.embedded.socialexercise.movement.MovementDetection;
 import com.embedded.socialexercise.movement.enums.Movement;
+import com.embedded.socialexercise.mqtt.MqttDetection;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +82,7 @@ public class MoveActivity extends BasicMenuActivity implements OnMovementChanged
             LinearLayout root = (LinearLayout) findViewById(R.id.workout_item_list);
             root.addView(cardItem);
             mapForWorkout.put(movement, movement.hashCode());
+            App.getMqttDetection().addTopic(movement.toString());
         }
     }
 

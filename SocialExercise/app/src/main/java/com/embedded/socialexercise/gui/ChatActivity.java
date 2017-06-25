@@ -27,6 +27,8 @@ import java.util.List;
 public class ChatActivity extends BasicMenuActivity implements OnMessageReceivedListener, OnPositionReceivedListener, AdapterView.OnItemSelectedListener {
     private MqttDetection detection;
     private LinearLayout contMsgs;
+    private Spinner spinner;
+    private ArrayAdapter<String> adapter;
     private ScrollView scrV;
     private String sender = "Anonymous";
     private LatLng position = new LatLng(0.0,0.0);
@@ -34,9 +36,19 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     private String curTopic = "SocialExercise";
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         registerForMqtt();
+        if(adapter==null){
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, detection.getTopics());
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(adapter);
+        }
     }
 
     private void registerForMqtt(){
@@ -68,11 +80,7 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
         setup(R.id.nav_chat);
         scrV = (ScrollView) findViewById(R.id.scrvMsgs);
         contMsgs = (LinearLayout) findViewById(R.id.contMsgs);
-        Spinner spinner = (Spinner) findViewById(R.id.spinner3);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.chat_choices, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        spinner = (Spinner) findViewById(R.id.spinner3);
         spinner.setOnItemSelectedListener(this);
 
         final EditText txt = new EditText(this);
