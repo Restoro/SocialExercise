@@ -32,7 +32,7 @@ import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
 
 @RuntimePermissions
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnPositionReceivedListener {
+public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallback, OnPositionReceivedListener {
 
     private final Context context = MapsActivity.this;
     private GoogleMap mMap;
@@ -47,6 +47,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         MapsActivityPermissionsDispatcher.createMapWithCheck(this);
+        setup(R.id.nav_maps);
     }
 
     @NeedsPermission({Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.ACCESS_COARSE_LOCATION})
@@ -164,7 +165,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
        // builder.include(pos);
         builder.include(new LatLng(48.214542, 14.228862+lonDifference));
         builder.include(new LatLng(48.214542, 14.228862-lonDifference));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
+        int width = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels;
+        int padding = (int) (width * 0.12);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
     }
 
 

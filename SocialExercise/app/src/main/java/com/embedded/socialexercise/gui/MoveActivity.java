@@ -16,7 +16,7 @@ import com.embedded.socialexercise.movement.enums.Movement;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MoveActivity extends AppCompatActivity implements OnMovementChangedListener {
+public class MoveActivity extends BasicMenuActivity implements OnMovementChangedListener {
     MovementDetection detection;
     boolean startWorkout = false;
     boolean showAllExercises = false;
@@ -27,6 +27,7 @@ public class MoveActivity extends AppCompatActivity implements OnMovementChanged
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movement);
         mapForWorkout = new HashMap<>();
+        setup(R.id.nav_move);
     }
 
     @Override

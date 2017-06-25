@@ -2,6 +2,7 @@ package com.embedded.socialexercise.gui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,7 +22,7 @@ import com.embedded.socialexercise.mqtt.Message;
 import com.embedded.socialexercise.mqtt.MqttDetection;
 import com.google.android.gms.maps.model.LatLng;
 
-public class ChatActivity extends AppCompatActivity implements OnMessageReceivedListener, OnPositionReceivedListener, AdapterView.OnItemSelectedListener {
+public class ChatActivity extends BasicMenuActivity implements OnMessageReceivedListener, OnPositionReceivedListener, AdapterView.OnItemSelectedListener {
     private MqttDetection detection;
     private LinearLayout contMsgs;
     private ScrollView scrV;
@@ -62,6 +63,7 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        setup(R.id.nav_chat);
         scrV = (ScrollView) findViewById(R.id.scrvMsgs);
         contMsgs = (LinearLayout) findViewById(R.id.contMsgs);
         Spinner spinner = (Spinner) findViewById(R.id.spinner3);
@@ -91,6 +93,13 @@ public class ChatActivity extends AppCompatActivity implements OnMessageReceived
             detection.sendMessage(msg);
             txt.setText(new char[0], 0, 0);
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        Object o = menu.getItem(0);
+        return true;
     }
 
     @Override
