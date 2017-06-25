@@ -109,6 +109,7 @@ public class PositionDetection extends Application implements LocationListener, 
     @Override
     public void onLocationChanged(Location location) {
         // Create LatLng with new Position
+        Log.i("PositionDetection","Get Position");
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         updatePositionEventListener(latLng);
     }

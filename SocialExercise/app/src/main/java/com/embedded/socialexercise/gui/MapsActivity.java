@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -61,8 +60,7 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
     @Override
     protected void onStart() {
         super.onStart();
-        detection = App.getMqttDetection();
-        detection.addOnPositionReceivedListener(this);
+        Log.i("Maps","Start");
     }
 
     @Override
@@ -169,6 +167,9 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
         int height = getResources().getDisplayMetrics().heightPixels;
         int padding = (int) (width * 0.12);
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
+
+        detection = App.getMqttDetection();
+        detection.addOnPositionReceivedListener(this);
     }
 
 

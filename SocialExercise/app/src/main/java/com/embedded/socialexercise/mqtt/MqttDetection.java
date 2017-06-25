@@ -49,7 +49,8 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         return connected;
     }
 
-    public void connect() {
+    public synchronized void connect() {
+        Log.i("MQTT","Connect...");
         if(!connected) {
             setup();
         }
@@ -109,7 +110,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
             sampleClient.connect(connOpts, null, new IMqttActionListener() {
 
                 public void onSuccess(IMqttToken asyncActionToken) {
-
+                    Log.i("MQTT","Connection succeed");
                     subscribeToTopic(topic, qos);
                     connected = true;
                 }
@@ -173,7 +174,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
 
     }
 
-    public void close() {
+    public synchronized void close() {
         if (connected) {
             try {
                 sampleClient.disconnect();

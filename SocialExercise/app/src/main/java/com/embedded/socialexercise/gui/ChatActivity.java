@@ -1,7 +1,8 @@
 package com.embedded.socialexercise.gui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -11,8 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 
 import com.embedded.socialexercise.App;
 import com.embedded.socialexercise.R;
@@ -55,7 +54,6 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
         if (detection != null) {
             detection.removeOnMessageReceivedListener(this);
             detection.removeOnPositionReceivedListener(this);
-            detection.close();
         }
     }
 
