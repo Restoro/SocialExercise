@@ -2,6 +2,7 @@ package com.embedded.socialexercise.gui;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,7 +30,7 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     private ScrollView scrV;
     private String sender = "Anonymous";
     private LatLng position = new LatLng(0.0,0.0);
-    private double MESSAGE_RANGE = 0.3d;
+    private double MESSAGE_RANGE = 50000;
     private String curTopic = "SocialExercise";
 
     @Override
@@ -143,7 +144,9 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     }
 
     private boolean isInRange(Message msg){
-        return ((Math.abs(msg.latitude-this.position.latitude) <= MESSAGE_RANGE)&& (Math.abs(msg.longitude-this.position.longitude) < MESSAGE_RANGE));
+        float[] result = {0};
+        Location.distanceBetween(position.latitude, position.longitude, msg.latitude, msg.longitude, result);
+        return result[0]<MESSAGE_RANGE;
     }
 
     private View getMessageView(Message msg) {
