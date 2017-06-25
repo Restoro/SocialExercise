@@ -3,7 +3,7 @@ package com.embedded.socialexercise.gui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.Menu;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,6 +30,7 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     private String sender = "Anonymous";
     private LatLng position = new LatLng(0.0,0.0);
     private double MESSAGE_RANGE = 0.3d;
+    private String curTopic = "SocialExercise";
 
     @Override
     protected void onStart() {
@@ -98,7 +99,12 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         contMsgs.removeAllViews();
-        List<Message> msgs = detection.setTopic((String) adapterView.getItemAtPosition(i));
+        String topicName = (String) adapterView.getItemAtPosition(i);
+        List<Message> msgs = detection.setTopic(topicName);
+        curTopic = topicName;
+        if (!curTopic.equals("SocialExercise")) {
+            curTopic = "SocialExercise" + curTopic;
+        }
         if(msgs!=null) {
             for (Message msg : msgs) {
                 if(msg.id.equals(detection.getClientId())){
@@ -118,7 +124,9 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
 
     @Override
     public void messageRecieved(Message msg) {
-       if (isInRange(msg)) {
+        Log.i("Message", "Cur:" + curTopic + " Recieved:" + msg.topic);
+
+       if (isInRange(msg) && curTopic.equals(msg.topic)) {
             final View v;
             if((detection.getClientId()).equals(msg.id)){
                 v = getMyMessageView(msg);
