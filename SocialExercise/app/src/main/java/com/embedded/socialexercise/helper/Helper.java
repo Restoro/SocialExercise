@@ -3,6 +3,7 @@ package com.embedded.socialexercise.helper;
 import android.os.Environment;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -27,7 +28,7 @@ public class Helper {
             File dir = new File(sdCard,"socialExercise");
 
             File file = new File(dir, fileName);
-            FileOutputStream f = new FileOutputStream(file, true);
+            FileOutputStream f = new FileOutputStream(file);
 
             try {
                 f.write(msg.getBytes());
@@ -40,6 +41,22 @@ public class Helper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static FileInputStream readFile(String fileName) {
+        try {
+            File sdCard = Environment.getExternalStorageDirectory();
+            File dir = new File(sdCard,"socialExercise");
+
+            File file = new File(dir, fileName);
+            FileInputStream f = new FileInputStream(file);
+
+            return f;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static boolean inRange(float number, float range, float offset) {
