@@ -54,6 +54,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
         topics.add(topic);
         detection = App.getProfileDetection();
         detection.addOnProfileChangedListener(this);
+        person = detection.getProfile();
         setup();
     }
 
@@ -125,7 +126,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
                 }
 
                 public void connectionLost(Throwable cause) {
-                    Log.i("MQTT", "Lost Connection");
+                    Log.e("MQTT", "Lost Connection", cause);
                 }
             });
 

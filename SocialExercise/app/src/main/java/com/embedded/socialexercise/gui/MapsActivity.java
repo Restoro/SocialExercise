@@ -24,7 +24,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
@@ -34,7 +36,7 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
 
     private final Context context = MapsActivity.this;
     private GoogleMap mMap;
-    private ArrayList<Marker> markers = new ArrayList<>();
+    private Map<String, Marker> markers = new HashMap<>();
     private MqttDetection detection;
     private SupportMapFragment mapFragment;
 
@@ -168,31 +170,22 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
         detection.addOnPositionReceivedListener(this);
     }
 
-
-    //TODO does not work yet
     @Override
     public void positionRecieved(final LatLng position,final String id, final Person person) {
         Log.i("Map","Got Position");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(Marker m : markers){
-                    Person p = (Person)m.getTag();
-                    if(id.equals(p.mqttID)){
-                        m.remove();
-                        markers.remove(m);
-                        break;
-                    }
+                Marker m = markers.get(person.mqttID);
+                LatLng position = new LatLng(person.latitude, person.longitude);
+                if(m==null) {
+                    m = mMap.addMarker(new MarkerOptions().position(position));
+                    markers.put(person.mqttID, m);
                 }
-
-                Marker m = mMap.addMarker(new MarkerOptions().position(position));
                 m.setTag(person);
-                markers.add(m);
-
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+                m.setPosition(position);
                 Log.i("Map","Added new position");
             }
         });
-
     }
 }

@@ -1,8 +1,10 @@
 package com.embedded.socialexercise.gui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -16,7 +18,7 @@ import com.embedded.socialexercise.person.ProfileDetection;
  * Created by Verena on 26.06.2017.
  */
 
-public class ProfileActivity extends BasicMenuActivity{
+public class ProfileActivity extends BasicMenuActivity implements CompoundButton.OnCheckedChangeListener{
 
     ProfileDetection detection;
     Person p = new Person();
@@ -38,7 +40,8 @@ public class ProfileActivity extends BasicMenuActivity{
         txt4.setText(p.favouriteActivities);
 
 
-        Switch s = (Switch) findViewById(R.id.isMale);
+        Switch s = (Switch) findViewById(R.id.isFemale);
+        s.setOnCheckedChangeListener(this);
         s.setChecked(!p.isMale);
 
         ImageView img = (ImageView) findViewById(R.id.imgAvatar);
@@ -49,7 +52,7 @@ public class ProfileActivity extends BasicMenuActivity{
         }
     }
 
-    public void onSendMsgClick(View v) {
+    public void onChangeProfileClick(View v) {
         EditText txt1 = (EditText) findViewById(R.id.txtFirstName);
         String firstName = txt1.getText().toString();
         EditText txt2 = (EditText) findViewById(R.id.txtLastName);
@@ -59,7 +62,7 @@ public class ProfileActivity extends BasicMenuActivity{
         EditText txt4 = (EditText) findViewById(R.id.txtAbout);
         String about = txt4.getText().toString();
 
-        Switch s = (Switch) findViewById(R.id.isMale);
+        Switch s = (Switch) findViewById(R.id.isFemale);
         Boolean isMale = !s.isChecked();
 
         ImageView img = (ImageView) findViewById(R.id.imgAvatar);
@@ -78,6 +81,8 @@ public class ProfileActivity extends BasicMenuActivity{
 
         Log.i("Profile",p.firstName);
         detection.changeProfile(p);
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -91,4 +96,13 @@ public class ProfileActivity extends BasicMenuActivity{
     }
 
 
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        ImageView img = (ImageView) findViewById(R.id.imgAvatar);
+        if(b){
+            img.setImageResource(R.drawable.girl0);
+        }else{
+            img.setImageResource(R.drawable.boy0);
+        }
+    }
 }

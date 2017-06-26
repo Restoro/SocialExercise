@@ -25,13 +25,12 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-public class ChatActivity extends BasicMenuActivity implements OnMessageReceivedListener, OnPositionReceivedListener, AdapterView.OnItemSelectedListener {
+public class ChatActivity extends BasicMenuActivity implements OnMessageReceivedListener, AdapterView.OnItemSelectedListener {
     private MqttDetection detection;
     private LinearLayout contMsgs;
     private Spinner spinner;
     private ArrayAdapter<String> adapter;
     private ScrollView scrV;
-    private Person person;
     private LatLng position = new LatLng(0.0,0.0);
     private double MESSAGE_RANGE = 50000;
     private String curTopic = "SocialExercise";
@@ -55,7 +54,6 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     private void registerForMqtt(){
         detection = App.getMqttDetection();
         if (detection != null) {
-            detection.addOnPositionReceivedListener(this);
             detection.addOnMessageReceivedListener(this);
             position = detection.getOwnPosition();
         }
@@ -70,7 +68,6 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     private void unregisterForMqtt() {
         if (detection != null) {
             detection.removeOnMessageReceivedListener(this);
-            detection.removeOnPositionReceivedListener(this);
         }
     }
 
@@ -175,15 +172,6 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
                 scrV.fullScroll(ScrollView.FOCUS_DOWN);
             }
         });
-    }
-
-    @Override
-    public void positionRecieved(LatLng position, String id, Person p) {
-        if(detection.getClientId().equals(id)){
-            this.position = position;
-            this.person = p;
-        }
-        this.position = position;
     }
 
 }
