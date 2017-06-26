@@ -179,10 +179,10 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
         String p = "Position;" + Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId
                 +";"+ Boolean.toString(person.isMale)
                 +";"+ Integer.toString(person.avatar)
-                +";"+ person.firstName
-                +";"+ person.lastName
-                +";"+ person.address
-                +";"+ person.favouriteActivities;
+                +";"+ (person.firstName.equals("")?"Anonymous":person.firstName)
+                +";"+ (person.lastName.equals("")?"Muster":person.lastName)
+                +";"+ (person.address.equals("")?"Rainbowland":person.address)
+                +";"+ (person.favouriteActivities.equals("")?"Everything":person.favouriteActivities);
         Log.i("MQTT", "Send Position" + p);
         MqttMessage message = new MqttMessage(p.getBytes());
         message.setQos(qos);
