@@ -1,8 +1,5 @@
 package com.embedded.socialexercise.gui;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,10 +14,8 @@ import android.widget.TextView;
 import com.embedded.socialexercise.App;
 import com.embedded.socialexercise.R;
 import com.embedded.socialexercise.events.OnMessageReceivedListener;
-import com.embedded.socialexercise.events.OnPositionReceivedListener;
 import com.embedded.socialexercise.mqtt.Message;
 import com.embedded.socialexercise.mqtt.MqttDetection;
-import com.embedded.socialexercise.person.Person;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
@@ -32,7 +27,6 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     private ArrayAdapter<String> adapter;
     private ScrollView scrV;
     private LatLng position = new LatLng(0.0,0.0);
-    private double MESSAGE_RANGE = 50000;
     private String curTopic = "SocialExercise";
 
     @Override
@@ -121,7 +115,7 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     public void messageRecieved(Message msg) {
         Log.i("Message", "Cur:" + curTopic + " Recieved:" + msg.topic);
 
-       if (isInRange(msg) && curTopic.equals(msg.topic)) {
+       if (curTopic.equals(msg.topic)) {
             final View v;
             if((detection.getClientId()).equals(msg.id)){
                 v = getMyMessageView(msg);
@@ -137,11 +131,6 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
         }
     }
 
-    private boolean isInRange(Message msg){
-        float[] result = {0};
-        Location.distanceBetween(position.latitude, position.longitude, msg.latitude, msg.longitude, result);
-        return result[0]<MESSAGE_RANGE;
-    }
 
     private View getMessageView(Message msg) {
         View v = getLayoutInflater().inflate(R.layout.text_message, null);

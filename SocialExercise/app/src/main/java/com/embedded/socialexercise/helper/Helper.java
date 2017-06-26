@@ -1,6 +1,9 @@
 package com.embedded.socialexercise.helper;
 
+import android.location.Location;
 import android.os.Environment;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,4 +65,11 @@ public class Helper {
     public static boolean inRange(float number, float range, float offset) {
         return range-offset <= number && number <= range+offset;
     }
+
+    public static boolean isInRange(LatLng position, double msgLati, double msgLong, double MESSAGE_RANGE){
+        float[] result = {0};
+        Location.distanceBetween(position.latitude, position.longitude, msgLati, msgLong, result);
+        return result[0]<MESSAGE_RANGE;
+    }
+
 }

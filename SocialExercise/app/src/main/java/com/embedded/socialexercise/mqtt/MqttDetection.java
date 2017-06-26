@@ -8,6 +8,7 @@ import com.embedded.socialexercise.events.OnMessageReceivedListener;
 import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
 import com.embedded.socialexercise.events.OnPositionReceivedListener;
 import com.embedded.socialexercise.events.OnProfileChangeListener;
+import com.embedded.socialexercise.helper.Helper;
 import com.embedded.socialexercise.person.Person;
 import com.embedded.socialexercise.person.ProfileDetection;
 import com.google.android.gms.maps.model.LatLng;
@@ -44,6 +45,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
     private Map<String, List<Message>> memory = new HashMap<>();
     private List<String> topics = new ArrayList<>();
     private ProfileDetection detection;
+    private double MESSAGE_RANGE = 15000;
 
 
     public MqttDetection(Context con) {
@@ -89,21 +91,21 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
                         Person person = new Person();
                         person.latitude = Double.parseDouble(split[1]);
                         person.longitude = Double.parseDouble(split[2]);
-                        person.mqttID = split[3];
-                        person.isMale = Boolean.parseBoolean(split[4]);
-                        person.avatar = Integer.parseInt(split[5]);
-                        person.firstName = split[6];
-                        person.lastName = split[7];
-                        person.address = split[8];
-                        person.favouriteActivities = split[9];
+                        if(Helper.isInRange(getOwnPosition(), person.latitude, person.longitude, MESSAGE_RANGE)) {
+                            person.mqttID = split[3];
+                            person.isMale = Boolean.parseBoolean(split[4]);
+                            person.avatar = Integer.parseInt(split[5]);
+                            person.firstName = split[6];
+                            person.lastName = split[7];
+                            person.address = split[8];
+                            person.favouriteActivities = split[9];
 
-
-                        fireOnPositionReceived(person);
+                            fireOnPositionReceived(person);
+                        }
                     }else{
                         //create Message
                         Message m = new Message();
                         if(split.length >= 5){
-
                             m.latitude = Double.parseDouble(split[0]);
                             m.longitude = Double.parseDouble(split[1]);
                             m.id = split[2];
@@ -115,10 +117,10 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
                         }
                         m.topic = topic;
                         m.time = String.valueOf(getCurrentTimeStamp());
-
-                        saveMessageInMemory(m);
-
-                        fireOnMessageReceived(m);
+                        if(Helper.isInRange(getOwnPosition(), m.latitude, m.longitude, MESSAGE_RANGE)) {
+                            saveMessageInMemory(m);
+                            fireOnMessageReceived(m);
+                        }
                     }
 
                 }
