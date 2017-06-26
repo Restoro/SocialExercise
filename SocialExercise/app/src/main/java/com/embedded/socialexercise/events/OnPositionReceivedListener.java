@@ -8,5 +8,5 @@ import com.google.android.gms.maps.model.LatLng;
  */
 
 public interface OnPositionReceivedListener {
-    void positionRecieved(LatLng position, String id, Person p);
+    void positionRecieved(Person p);
 }

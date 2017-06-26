@@ -15,7 +15,7 @@ import java.util.List;
  * Created by Verena on 26.06.2017.
  */
 
-public class ProfileDetection implements OnPositionReceivedListener{
+public class ProfileDetection {
 
     Person p;
     private MqttDetection detection;
@@ -33,12 +33,6 @@ public class ProfileDetection implements OnPositionReceivedListener{
 
     public Person getProfile(){
         return p;
-    }
-    @Override
-    public void positionRecieved(LatLng position, String id, Person p) {
-        p.mqttID = id;
-        p.longitude = position.longitude;
-        p.latitude = position.latitude;
     }
 
     public void changeProfile(Person p){

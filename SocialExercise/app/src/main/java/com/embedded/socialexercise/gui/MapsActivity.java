@@ -170,8 +170,10 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
         detection.addOnPositionReceivedListener(this);
     }
 
+    private boolean firstTime = true;
+
     @Override
-    public void positionRecieved(final LatLng position,final String id, final Person person) {
+    public void positionRecieved(final Person person) {
         Log.i("Map","Got Position");
         runOnUiThread(new Runnable() {
             @Override

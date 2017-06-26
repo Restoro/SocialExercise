@@ -84,9 +84,10 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
 
                     //check if message or position update
                     if(split[0].equals("Position")){
-                        LatLng p = new LatLng(Double.parseDouble(split[1]),Double.parseDouble(split[2]));
                         String id = split[3];
                         person = new Person();
+                        person.latitude = Double.parseDouble(split[1]);
+                        person.longitude = Double.parseDouble(split[2]);
                         person.isMale = Boolean.parseBoolean(split[4]);
                         person.mqttID = split[5];
                         person.avatar = Integer.parseInt(split[6]);
@@ -96,7 +97,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
                         person.favouriteActivities = split[10];
 
 
-                        fireOnPositionReceived(p,id,person);
+                        fireOnPositionReceived(person);
                     }else{
                         //create Message
                         Message m = new Message();
@@ -267,11 +268,11 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
         }
     }
 
-    private void fireOnPositionReceived(LatLng p, String id, Person person) {
+    private void fireOnPositionReceived(Person person) {
         Log.i("MQTT","Got Position");
         for (OnPositionReceivedListener listener : listenersPos) {
             try {
-                listener.positionRecieved(p,id, person);
+                listener.positionRecieved(person);
             } catch (Exception e) {
                 Log.e("MQTT", e.getMessage());
             }
@@ -300,6 +301,8 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
 
     @Override
     public void onLocationChanged(LatLng position) {
+        person.latitude = position.latitude;
+        person.longitude = position.longitude;
         if(connected)
             this.sendPosition(position);
     }
