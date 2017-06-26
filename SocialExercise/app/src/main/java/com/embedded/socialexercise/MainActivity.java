@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.embedded.socialexercise.gui.ProfileActivity;
 import com.embedded.socialexercise.gui.ChatActivity;
 import com.embedded.socialexercise.gui.MapsActivity;
 import com.embedded.socialexercise.gui.MoveActivity;
@@ -41,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    public void goToProfile(View v) {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
+    }
     public void goToMove(View v) {
         Intent intent = new Intent(this, MoveActivity.class);
         startActivity(intent);
@@ -55,4 +60,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ChatActivity.class);
         startActivity(intent);
     }
+
+
 }

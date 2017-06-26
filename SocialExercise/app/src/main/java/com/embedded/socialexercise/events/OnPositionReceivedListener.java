@@ -1,5 +1,6 @@
 package com.embedded.socialexercise.events;
 
+import com.embedded.socialexercise.person.Person;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -7,5 +8,5 @@ import com.google.android.gms.maps.model.LatLng;
  */
 
 public interface OnPositionReceivedListener {
-    void positionRecieved(LatLng position, String id);
+    void positionRecieved(LatLng position, String id, Person p);
 }

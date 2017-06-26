@@ -5,12 +5,14 @@ import android.hardware.SensorManager;
 
 import com.embedded.socialexercise.movement.MovementDetection;
 import com.embedded.socialexercise.mqtt.MqttDetection;
+import com.embedded.socialexercise.person.ProfileDetection;
 import com.embedded.socialexercise.position.PositionDetection;
 
 public class App extends Application {
     private PositionDetection positionDetection;
     private MovementDetection movementDetection;
     private MqttDetection mqttDetection;
+    private ProfileDetection profileDetection;
     private static App mInstance;
 
     @Override
@@ -44,6 +46,11 @@ public class App extends Application {
         return mqttDetection;
     }
 
+    public ProfileDetection getProfileDetectionInstance() {
+        if (profileDetection == null)
+            profileDetection = new ProfileDetection();
+        return profileDetection;
+    }
     public static PositionDetection getPositionDetection() {
         return getInstance().getPositionDetectionInstance();
     }
@@ -54,6 +61,10 @@ public class App extends Application {
 
     public static MqttDetection getMqttDetection() {
         return  getInstance().getMqttDetectionInstance();
+    }
+
+    public static ProfileDetection getProfileDetection() {
+        return  getInstance().getProfileDetectionInstance();
     }
 
 

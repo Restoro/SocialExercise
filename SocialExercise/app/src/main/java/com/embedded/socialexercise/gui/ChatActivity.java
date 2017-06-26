@@ -20,6 +20,7 @@ import com.embedded.socialexercise.events.OnMessageReceivedListener;
 import com.embedded.socialexercise.events.OnPositionReceivedListener;
 import com.embedded.socialexercise.mqtt.Message;
 import com.embedded.socialexercise.mqtt.MqttDetection;
+import com.embedded.socialexercise.person.Person;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     private Spinner spinner;
     private ArrayAdapter<String> adapter;
     private ScrollView scrV;
-    private String sender = "Anonymous";
+    private Person person;
     private LatLng position = new LatLng(0.0,0.0);
     private double MESSAGE_RANGE = 50000;
     private String curTopic = "SocialExercise";
@@ -82,24 +83,12 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
         contMsgs = (LinearLayout) findViewById(R.id.contMsgs);
         spinner = (Spinner) findViewById(R.id.spinner3);
         spinner.setOnItemSelectedListener(this);
-
-        final EditText txt = new EditText(this);
-        txt.setHint("Anonymous");
-        new AlertDialog.Builder(this)
-                .setMessage("   ENTER YOUR USERNAME HERE!")
-                .setView(txt)
-                .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        sender = txt.getText().toString();
-                    }
-                }).show();
     }
 
     public void onSendMsgClick(View v) {
         EditText txt = (EditText) findViewById(R.id.txtNewMsg);
         String msg = txt.getText().toString();
         if (!msg.equals("")) {
-            detection.setSender(sender);
             detection.sendMessage(msg);
             txt.setText(new char[0], 0, 0);
         }
@@ -189,9 +178,10 @@ public class ChatActivity extends BasicMenuActivity implements OnMessageReceived
     }
 
     @Override
-    public void positionRecieved(LatLng position, String id) {
+    public void positionRecieved(LatLng position, String id, Person p) {
         if(detection.getClientId().equals(id)){
             this.position = position;
+            this.person = p;
         }
         this.position = position;
     }

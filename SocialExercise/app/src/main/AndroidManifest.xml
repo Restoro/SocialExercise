@@ -45,19 +45,22 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"
             android:keepScreenOn="true"/>
-
-        <service android:name="org.eclipse.paho.android.service.MqttService"></service>
-
         <activity
             android:name=".gui.MapsActivity"
             android:label="@string/title_activity_maps"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"/>
+
+        <service android:name="org.eclipse.paho.android.service.MqttService"></service>
+
+        <activity android:name=".gui.ProfileActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+           </activity>
     </application>
 
 </manifest>

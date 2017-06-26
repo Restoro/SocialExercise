@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.embedded.socialexercise.App;
 import com.embedded.socialexercise.R;
 import com.embedded.socialexercise.events.OnPositionReceivedListener;
-import com.embedded.socialexercise.helper.Helper;
 import com.embedded.socialexercise.mqtt.MqttDetection;
 import com.embedded.socialexercise.person.Person;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -97,9 +96,9 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
             public View getInfoContents(Marker marker) {
                 View v = getLayoutInflater().inflate(R.layout.info_window_person, null);
                 Person p = (Person) marker.getTag();
-                ((TextView) v.findViewById(R.id.txtName)).setText(p.firstName);
+                ((TextView) v.findViewById(R.id.txtName)).setText(p.firstName + " " + p.lastName);
                 ((TextView) v.findViewById(R.id.txtAddr)).setText(p.address);
-                ((TextView) v.findViewById(R.id.txtFavSports)).setText(Helper.iterableToString(p.favouriteActivities));;
+                ((TextView) v.findViewById(R.id.txtFavSports)).setText((p.favouriteActivities));;
                 ((ImageView) v.findViewById(R.id.imgAvatar)).setImageResource(p.getAvatarId());
                 return v;
             }
@@ -124,7 +123,6 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
         favAct.add("Football");
         favAct.add("Running");
         favAct.add("Squads");
-        p.favouriteActivities = favAct;
         m.setTag(p);
 
 
@@ -140,7 +138,6 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
         favAct.add("Tennis");
         favAct.add("Push-ups");
         favAct.add("Squads");
-        p.favouriteActivities = favAct;
         m.setTag(p);
 
         pos = new LatLng(48.214542, 14.228862);
@@ -154,7 +151,6 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
         favAct.add("Dancing");
         favAct.add("Skipping");
         favAct.add("Squads");
-        p.favouriteActivities = favAct;
         m.setTag(p);
 
 
@@ -175,7 +171,7 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
 
     //TODO does not work yet
     @Override
-    public void positionRecieved(final LatLng position,final String id) {
+    public void positionRecieved(final LatLng position,final String id, final Person person) {
         Log.i("Map","Got Position");
         runOnUiThread(new Runnable() {
             @Override
@@ -185,27 +181,12 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
                     if(id.equals(p.mqttID)){
                         m.remove();
                         markers.remove(m);
-                        m = mMap.addMarker(new MarkerOptions().position(position));
-                        m.setTag(p);
-                        markers.add(m);
-                        return;
+                        break;
                     }
                 }
 
                 Marker m = mMap.addMarker(new MarkerOptions().position(position));
-                Person p = new Person();
-                p.firstName = "Test";
-                p.mqttID = id;
-                p.address = "Wels";
-                p.isMale = true;
-                p.avatar = 4;
-                List<String> favAct = new ArrayList<>();
-                favAct = new ArrayList<>();
-                favAct.add("Tennis");
-                favAct.add("Push-ups");
-                favAct.add("Squads");
-                p.favouriteActivities = favAct;
-                m.setTag(p);
+                m.setTag(person);
                 markers.add(m);
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15));

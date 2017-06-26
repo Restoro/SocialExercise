@@ -8,12 +8,12 @@ public class Person {
     public boolean isMale;
     public String mqttID;
     public int avatar;
-    public float longitude;
-    public float latitude;
+    public double longitude;
+    public double latitude;
     public String firstName;
     public String lastName;
     public String address;
-    public List<String> favouriteActivities;
+    public String favouriteActivities;
 
     public int getAvatarId() {
         if(isMale) {

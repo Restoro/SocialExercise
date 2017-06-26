@@ -7,6 +7,9 @@ import com.embedded.socialexercise.App;
 import com.embedded.socialexercise.events.OnMessageReceivedListener;
 import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
 import com.embedded.socialexercise.events.OnPositionReceivedListener;
+import com.embedded.socialexercise.events.OnProfileChangeListener;
+import com.embedded.socialexercise.person.Person;
+import com.embedded.socialexercise.person.ProfileDetection;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -26,12 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
+public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, OnProfileChangeListener{
     private Context context;
     private String broker;
     private String clientId;
     private String topic;
-    private String sender;
+    private Person person = new Person();
     private MqttAsyncClient sampleClient;
     private final int qos = 0;
     private boolean connected;
@@ -40,6 +43,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
     private LatLng position = new LatLng(0.0,0.0);
     private Map<String, List<Message>> memory = new HashMap<>();
     private List<String> topics = new ArrayList<>();
+    private ProfileDetection detection;
 
 
     public MqttDetection(Context con) {
@@ -48,6 +52,8 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         this.clientId = MqttAsyncClient.generateClientId();
         this.topic = "SocialExercise";
         topics.add(topic);
+        detection = App.getProfileDetection();
+        detection.addOnProfileChangedListener(this);
         setup();
     }
 
@@ -79,7 +85,17 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
                     if(split[0].equals("Position")){
                         LatLng p = new LatLng(Double.parseDouble(split[1]),Double.parseDouble(split[2]));
                         String id = split[3];
-                        fireOnPositionReceived(p,id);
+                        person = new Person();
+                        person.isMale = Boolean.parseBoolean(split[4]);
+                        person.mqttID = split[5];
+                        person.avatar = Integer.parseInt(split[6]);
+                        person.firstName = split[7];
+                        person.lastName = split[8];
+                        person.address = split[9];
+                        person.favouriteActivities = split[10];
+
+
+                        fireOnPositionReceived(p,id,person);
                     }else{
                         //create Message
                         Message m = new Message();
@@ -158,7 +174,15 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
 
         Log.i("MQTT", "Sending pos");
         this.position = position;
-        String p = "Position;" + Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId;
+        String p = "Position;" + Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId
+                +";"+ Boolean.toString(person.isMale)
+                +";"+ person.mqttID
+                +";"+ Integer.toString(person.avatar)
+                +";"+ person.firstName
+                +";"+ person.lastName
+                +";"+ person.address
+                +";"+ person.favouriteActivities;
+        Log.i("MQTT", "Send Position" + p);
         MqttMessage message = new MqttMessage(p.getBytes());
         message.setQos(qos);
         try {
@@ -175,7 +199,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         if (!connected) {
             new MqttDetection(context);
         }
-        String m = Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId+";"+sender+";"+msg;
+        String m = Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId+";"+person.firstName+";"+msg;
         Log.i("MQTT", "Sending msg to" + topic);
         MqttMessage message = new MqttMessage(m.getBytes());
         message.setQos(qos);
@@ -242,16 +266,17 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         }
     }
 
-    private void fireOnPositionReceived(LatLng p, String id) {
+    private void fireOnPositionReceived(LatLng p, String id, Person person) {
         Log.i("MQTT","Got Position");
         for (OnPositionReceivedListener listener : listenersPos) {
             try {
-                listener.positionRecieved(p,id);
+                listener.positionRecieved(p,id, person);
             } catch (Exception e) {
                 Log.e("MQTT", e.getMessage());
             }
         }
     }
+
 
     public void addTopic(String topic) {
         topics.add(topic);
@@ -267,9 +292,6 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         return strDate;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
 
     public String getClientId(){
         return  clientId;
@@ -283,5 +305,10 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
 
     public LatLng getOwnPosition() {
         return position;
+    }
+
+    @Override
+    public void profileChanged(Person p) {
+        this.person = p;
     }
 }
