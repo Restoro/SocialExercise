@@ -55,6 +55,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
         detection = App.getProfileDetection();
         detection.addOnProfileChangedListener(this);
         person = detection.getProfile();
+        person.mqttID = clientId;
         setup();
     }
 
@@ -89,12 +90,11 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
                         person.latitude = Double.parseDouble(split[1]);
                         person.longitude = Double.parseDouble(split[2]);
                         person.isMale = Boolean.parseBoolean(split[4]);
-                        person.mqttID = split[5];
-                        person.avatar = Integer.parseInt(split[6]);
-                        person.firstName = split[7];
-                        person.lastName = split[8];
-                        person.address = split[9];
-                        person.favouriteActivities = split[10];
+                        person.avatar = Integer.parseInt(split[5]);
+                        person.firstName = split[6];
+                        person.lastName = split[7];
+                        person.address = split[8];
+                        person.favouriteActivities = split[9];
 
 
                         fireOnPositionReceived(person);
@@ -175,10 +175,8 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
         this.connect();
 
         Log.i("MQTT", "Sending pos");
-        this.position = position;
         String p = "Position;" + Double.toString(position.latitude)+";"+Double.toString(position.longitude)+";"+clientId
                 +";"+ Boolean.toString(person.isMale)
-                +";"+ person.mqttID
                 +";"+ Integer.toString(person.avatar)
                 +";"+ person.firstName
                 +";"+ person.lastName
@@ -303,6 +301,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
     public void onLocationChanged(LatLng position) {
         person.latitude = position.latitude;
         person.longitude = position.longitude;
+        this.position = position;
         if(connected)
             this.sendPosition(position);
     }

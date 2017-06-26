@@ -168,9 +168,10 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
 
         detection = App.getMqttDetection();
         detection.addOnPositionReceivedListener(this);
+        new Thread(getRunnable()).start();
     }
 
-    private boolean firstTime = true;
+    private boolean cameraSetted;
 
     @Override
     public void positionRecieved(final Person person) {
@@ -189,5 +190,41 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
                 Log.i("Map","Added new position");
             }
         });
+    }
+
+    private boolean setCamera(){
+        LatLng position = detection.getOwnPosition();
+        if(position.latitude==0.0 && position.longitude==0.0) return false;
+        double lonDifference = 25.0/111.32*Math.cos(position.latitude*Math.PI/180);
+        builder = new LatLngBounds.Builder();
+        // builder.include(pos);
+        builder.include(new LatLng(position.latitude, position.longitude+lonDifference));
+        builder.include(new LatLng(position.latitude, position.longitude-lonDifference));
+        final int width = getResources().getDisplayMetrics().widthPixels;
+        final int height = getResources().getDisplayMetrics().heightPixels;
+        final int padding = (int) (width * 0.12);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
+            }
+        });
+        return true;
+    }
+
+    private Runnable getRunnable() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                if(!setCamera()) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    new Thread(getRunnable()).start();
+                }
+            }
+        };
     }
 }
