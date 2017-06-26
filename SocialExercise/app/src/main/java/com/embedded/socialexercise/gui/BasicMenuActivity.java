@@ -6,16 +6,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.embedded.socialexercise.R;
 
-/**
- * Created by hoellinger on 23.06.2017.
- */
 
 public class BasicMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

@@ -14,9 +14,6 @@ import com.embedded.socialexercise.R;
 import com.embedded.socialexercise.person.Person;
 import com.embedded.socialexercise.person.ProfileDetection;
 
-/**
- * Created by Verena on 26.06.2017.
- */
 
 public class ProfileActivity extends BasicMenuActivity implements CompoundButton.OnCheckedChangeListener{
 

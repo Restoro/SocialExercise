@@ -9,9 +9,6 @@ import com.embedded.socialexercise.mqtt.MqttDetection;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 
-/**
- * Created by Verena on 26.06.2017.
- */
 
 public class ProfileDetection {
 
