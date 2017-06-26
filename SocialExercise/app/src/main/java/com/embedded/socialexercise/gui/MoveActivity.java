@@ -1,7 +1,6 @@
 package com.embedded.socialexercise.gui;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -12,7 +11,6 @@ import com.embedded.socialexercise.R;
 import com.embedded.socialexercise.events.OnMovementChangedListener;
 import com.embedded.socialexercise.movement.MovementDetection;
 import com.embedded.socialexercise.movement.enums.Movement;
-import com.embedded.socialexercise.mqtt.MqttDetection;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,10 +65,10 @@ public class MoveActivity extends BasicMenuActivity implements OnMovementChanged
         } else {
             currentTxt.setVisibility(View.VISIBLE);
         }
-        addCardForMovement(curMovement);
+        addCardForMovement(curMovement, false);
     }
 
-    private void addCardForMovement(Movement movement) {
+    private void addCardForMovement(Movement movement, boolean showAll) {
         if (!mapForWorkout.containsKey(movement) && movement != Movement.NONE) {
             View cardItem = getLayoutInflater().inflate(R.layout.workout_item, null);
             cardItem.setId(movement.hashCode());
@@ -82,7 +80,8 @@ public class MoveActivity extends BasicMenuActivity implements OnMovementChanged
             LinearLayout root = (LinearLayout) findViewById(R.id.workout_item_list);
             root.addView(cardItem);
             mapForWorkout.put(movement, movement.hashCode());
-            App.getMqttDetection().addTopic(movement.toString());
+            if(!showAll)
+                App.getMqttDetection().addTopic(movement.toString());
         }
     }
 
@@ -116,7 +115,7 @@ public class MoveActivity extends BasicMenuActivity implements OnMovementChanged
         for (Movement m : Movement.values()) {
             if (m != Movement.NONE) {
                 if (showAllExercises)
-                    addCardForMovement(m);
+                    addCardForMovement(m, true);
                 else {
                     LinearLayout root = (LinearLayout) findViewById(R.id.workout_item_list);
                     int cardItemId = mapForWorkout.get(m);
@@ -125,6 +124,7 @@ public class MoveActivity extends BasicMenuActivity implements OnMovementChanged
                     if (counterTextView.getText().equals("0")) {
                         root.removeView(cardItem);
                         mapForWorkout.remove(m);
+                        App.getMqttDetection().removeTopic(m.toString());
                     }
                 }
             }

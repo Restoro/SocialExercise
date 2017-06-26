@@ -1,7 +1,6 @@
 package com.embedded.socialexercise.mqtt;
 
 import android.content.Context;
-import android.location.Location;
 import android.util.Log;
 
 import com.embedded.socialexercise.App;
@@ -9,7 +8,6 @@ import com.embedded.socialexercise.events.OnMessageReceivedListener;
 import com.embedded.socialexercise.events.OnPositionLocationChangedListener;
 import com.embedded.socialexercise.events.OnPositionReceivedListener;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -259,6 +257,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener{
         topics.add(topic);
     }
 
+    public void removeTopic(String topic) { topics.remove(topic); }
     public List<String> getTopics(){ return topics;}
 
     public static String getCurrentTimeStamp() {

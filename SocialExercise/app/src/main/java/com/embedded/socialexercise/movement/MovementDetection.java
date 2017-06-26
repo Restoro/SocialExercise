@@ -116,11 +116,6 @@ public class MovementDetection implements SensorEventListener {
                 setPrediction(quartileMap);
                 mapCounterIncrease(toAdd);
                 sb.append("Current Prediction:" + currentPrediction + "\n");
-                sb.append(createQuartileMapString(quartileMap));
-                for(Exercise exercise :exerciseToDetect) {
-                    if(exercise.getMovementType() != Movement.NONE)
-                    sb.append("Move Counter:"  + exercise.getMovementType() + " - " + exercise.getMoveCounter() + "\n");
-                }
             }
         } else {
             timeWindow.add(new SensorData(timeStamp, x, y, z));
