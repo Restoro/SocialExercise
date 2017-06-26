@@ -89,6 +89,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
                         person = new Person();
                         person.latitude = Double.parseDouble(split[1]);
                         person.longitude = Double.parseDouble(split[2]);
+                        person.mqttID = split[3];
                         person.isMale = Boolean.parseBoolean(split[4]);
                         person.avatar = Integer.parseInt(split[5]);
                         person.firstName = split[6];
