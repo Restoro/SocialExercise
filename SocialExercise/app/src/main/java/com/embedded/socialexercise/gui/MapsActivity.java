@@ -112,60 +112,6 @@ public class MapsActivity extends BasicMenuActivity implements OnMapReadyCallbac
             }
         });
 
-        // Add a marker in Sydney and move the camera
-        LatLng pos = new LatLng(48.337714, 14.319592);
-        Marker m = mMap.addMarker(new MarkerOptions().position(pos));
-        Person p = new Person();
-        p.firstName = "Niki";
-        p.mqttID = "paho39p4873294827";
-        p.address = "Linz";
-        p.isMale = true;
-        p.avatar = 0;
-        List<String> favAct = new ArrayList<>();
-        favAct.add("Football");
-        favAct.add("Running");
-        favAct.add("Squads");
-        m.setTag(p);
-
-
-
-        pos = new LatLng(48.159067, 14.033028);
-        m = mMap.addMarker(new MarkerOptions().position(pos));
-        p = new Person();
-        p.firstName = "Pazi";
-        p.address = "Wels";
-        p.isMale = true;
-        p.avatar = 4;
-        favAct = new ArrayList<>();
-        favAct.add("Tennis");
-        favAct.add("Push-ups");
-        favAct.add("Squads");
-        m.setTag(p);
-
-        pos = new LatLng(48.214542, 14.228862);
-        m = mMap.addMarker(new MarkerOptions().position(pos));
-        p = new Person();
-        p.firstName = "Veri";
-        p.address = "Traun";
-        p.isMale = false;
-        p.avatar = 8;
-        favAct = new ArrayList<>();
-        favAct.add("Dancing");
-        favAct.add("Skipping");
-        favAct.add("Squads");
-        m.setTag(p);
-
-
-        double lonDifference = 25.0/111.32*Math.cos(48.214542*Math.PI/180);
-        builder = new LatLngBounds.Builder();
-       // builder.include(pos);
-        builder.include(new LatLng(48.214542, 14.228862+lonDifference));
-        builder.include(new LatLng(48.214542, 14.228862-lonDifference));
-        int width = getResources().getDisplayMetrics().widthPixels;
-        int height = getResources().getDisplayMetrics().heightPixels;
-        int padding = (int) (width * 0.12);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), width, height, padding));
-
         detection = App.getMqttDetection();
         detection.addOnPositionReceivedListener(this);
         new Thread(getRunnable()).start();

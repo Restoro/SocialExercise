@@ -86,7 +86,7 @@ public class MqttDetection implements IMqtt, OnPositionLocationChangedListener, 
                     //check if message or position update
                     if(split[0].equals("Position")){
                         String id = split[3];
-                        person = new Person();
+                        Person person = new Person();
                         person.latitude = Double.parseDouble(split[1]);
                         person.longitude = Double.parseDouble(split[2]);
                         person.mqttID = split[3];
